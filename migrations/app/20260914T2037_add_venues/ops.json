@@ -1,0 +1,287 @@
+[
+  {
+    "id": "table.venues",
+    "label": "Create table \"venues\"",
+    "summary": "Creates table \"venues\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "venues"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"venues\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"venues\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"venues\"",
+        "sql": "CREATE TABLE \"public\".\"venues\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"leagueId\" int4 NOT NULL,\n  \"name\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"venues\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"venues\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.teams.venueId",
+    "label": "Add column \"venueId\" to \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "venueId",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"venueId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "teams",
+          "venueId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"venueId\"",
+        "sql": "ALTER TABLE \"public\".\"teams\" ADD COLUMN \"venueId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"venueId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "teams",
+          "venueId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.venues.venues_leagueId_name_key",
+    "label": "Add unique constraint on \"venues\" (leagueId, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "venues_leagueId_name_key",
+        "table": "venues"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"venues_leagueId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "venues_leagueId_name_key",
+          "public",
+          "\"public\".\"venues\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"venues_leagueId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"venues\" ADD CONSTRAINT \"venues_leagueId_name_key\" UNIQUE (\"leagueId\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"venues_leagueId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "venues_leagueId_name_key",
+          "public",
+          "\"public\".\"venues\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.teams.teams_venueId_idx_b49e8dab",
+    "label": "Create index \"teams_venueId_idx_b49e8dab\" on \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "teams_venueId_idx_b49e8dab",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"teams_venueId_idx_b49e8dab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams_venueId_idx_b49e8dab\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"teams_venueId_idx_b49e8dab\"",
+        "sql": "CREATE INDEX \"teams_venueId_idx_b49e8dab\" ON \"public\".\"teams\" (\"venueId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"teams_venueId_idx_b49e8dab\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams_venueId_idx_b49e8dab\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.venues.venues_leagueId_idx_1296e985",
+    "label": "Create index \"venues_leagueId_idx_1296e985\" on \"venues\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "venues_leagueId_idx_1296e985",
+        "table": "venues"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"venues_leagueId_idx_1296e985\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"venues_leagueId_idx_1296e985\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"venues_leagueId_idx_1296e985\"",
+        "sql": "CREATE INDEX \"venues_leagueId_idx_1296e985\" ON \"public\".\"venues\" (\"leagueId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"venues_leagueId_idx_1296e985\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"venues_leagueId_idx_1296e985\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.venues.venues_leagueId_fkey",
+    "label": "Add foreign key \"venues_leagueId_fkey\" on \"venues\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "venues_leagueId_fkey",
+        "table": "venues"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"venues_leagueId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "venues_leagueId_fkey",
+          "public",
+          "\"public\".\"venues\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"venues_leagueId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"venues\"\nADD CONSTRAINT \"venues_leagueId_fkey\"\nFOREIGN KEY (\"leagueId\")\nREFERENCES \"public\".\"leagues\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"venues_leagueId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "venues_leagueId_fkey",
+          "public",
+          "\"public\".\"venues\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.teams.teams_venueId_fkey",
+    "label": "Add foreign key \"teams_venueId_fkey\" on \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "teams_venueId_fkey",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"teams_venueId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_venueId_fkey",
+          "public",
+          "\"public\".\"teams\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"teams_venueId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"teams\"\nADD CONSTRAINT \"teams_venueId_fkey\"\nFOREIGN KEY (\"venueId\")\nREFERENCES \"public\".\"venues\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"teams_venueId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_venueId_fkey",
+          "public",
+          "\"public\".\"teams\""
+        ]
+      }
+    ]
+  }
+]

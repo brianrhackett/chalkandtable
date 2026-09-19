@@ -1,0 +1,1471 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.leagues",
+    "label": "Create table \"leagues\"",
+    "summary": "Creates table \"leagues\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "leagues"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"leagues\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"leagues\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"leagues\"",
+        "sql": "CREATE TABLE \"public\".\"leagues\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"playerStatsEnabled\" bool DEFAULT false NOT NULL,\n  \"slug\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"leagues\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"leagues\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.matches",
+    "label": "Create table \"matches\"",
+    "summary": "Creates table \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"matches\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"matches\"",
+        "sql": "CREATE TABLE \"public\".\"matches\" (\n  \"awayScore\" int4,\n  \"awayTeamId\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"homeScore\" int4,\n  \"homeTeamId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"scheduledAt\" timestamptz NOT NULL,\n  \"seasonId\" int4 NOT NULL,\n  \"status\" text DEFAULT 'scheduled' NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"week\" int4 NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"matches_status_check_8115599a\" CHECK (\"status\" IN ('scheduled', 'completed', 'postponed', 'cancelled'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"matches\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.players",
+    "label": "Create table \"players\"",
+    "summary": "Creates table \"players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"players\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"players\"",
+        "sql": "CREATE TABLE \"public\".\"players\" (\n  \"active\" bool DEFAULT true NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"email\" text,\n  \"firstName\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"lastName\" text NOT NULL,\n  \"leagueId\" int4 NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"players\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"players\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.roster_players",
+    "label": "Create table \"roster_players\"",
+    "summary": "Creates table \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"roster_players\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"roster_players\"",
+        "sql": "CREATE TABLE \"public\".\"roster_players\" (\n  \"active\" bool DEFAULT true NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"joinedAt\" timestamptz,\n  \"leftAt\" timestamptz,\n  \"playerId\" int4 NOT NULL,\n  \"seasonId\" int4 NOT NULL,\n  \"teamId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"roster_players\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.season_teams",
+    "label": "Create table \"season_teams\"",
+    "summary": "Creates table \"season_teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "season_teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"season_teams\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"season_teams\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"season_teams\"",
+        "sql": "CREATE TABLE \"public\".\"season_teams\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"seasonId\" int4 NOT NULL,\n  \"teamId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"season_teams\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"season_teams\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.seasons",
+    "label": "Create table \"seasons\"",
+    "summary": "Creates table \"seasons\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "seasons"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"seasons\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"seasons\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"seasons\"",
+        "sql": "CREATE TABLE \"public\".\"seasons\" (\n  \"active\" bool DEFAULT false NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"endDate\" timestamptz,\n  \"id\" SERIAL NOT NULL,\n  \"leagueId\" int4 NOT NULL,\n  \"name\" text NOT NULL,\n  \"startDate\" timestamptz,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"seasons\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"seasons\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.teams",
+    "label": "Create table \"teams\"",
+    "summary": "Creates table \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"teams\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"teams\"",
+        "sql": "CREATE TABLE \"public\".\"teams\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"leagueId\" int4 NOT NULL,\n  \"name\" text NOT NULL,\n  \"slug\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"teams\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.leagues.leagues_slug_key",
+    "label": "Add unique constraint on \"leagues\" (slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "leagues_slug_key",
+        "table": "leagues"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"leagues_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "leagues_slug_key",
+          "public",
+          "\"public\".\"leagues\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"leagues_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"leagues\" ADD CONSTRAINT \"leagues_slug_key\" UNIQUE (\"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"leagues_slug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "leagues_slug_key",
+          "public",
+          "\"public\".\"leagues\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.roster_players.roster_players_seasonId_playerId_key",
+    "label": "Add unique constraint on \"roster_players\" (seasonId, playerId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "roster_players_seasonId_playerId_key",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"roster_players_seasonId_playerId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_seasonId_playerId_key",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"roster_players_seasonId_playerId_key\"",
+        "sql": "ALTER TABLE \"public\".\"roster_players\" ADD CONSTRAINT \"roster_players_seasonId_playerId_key\" UNIQUE (\"seasonId\", \"playerId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"roster_players_seasonId_playerId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_seasonId_playerId_key",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.season_teams.season_teams_seasonId_teamId_key",
+    "label": "Add unique constraint on \"season_teams\" (seasonId, teamId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "season_teams_seasonId_teamId_key",
+        "table": "season_teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"season_teams_seasonId_teamId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "season_teams_seasonId_teamId_key",
+          "public",
+          "\"public\".\"season_teams\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"season_teams_seasonId_teamId_key\"",
+        "sql": "ALTER TABLE \"public\".\"season_teams\" ADD CONSTRAINT \"season_teams_seasonId_teamId_key\" UNIQUE (\"seasonId\", \"teamId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"season_teams_seasonId_teamId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "season_teams_seasonId_teamId_key",
+          "public",
+          "\"public\".\"season_teams\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.seasons.seasons_leagueId_name_key",
+    "label": "Add unique constraint on \"seasons\" (leagueId, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "seasons_leagueId_name_key",
+        "table": "seasons"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"seasons_leagueId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "seasons_leagueId_name_key",
+          "public",
+          "\"public\".\"seasons\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"seasons_leagueId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"seasons\" ADD CONSTRAINT \"seasons_leagueId_name_key\" UNIQUE (\"leagueId\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"seasons_leagueId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "seasons_leagueId_name_key",
+          "public",
+          "\"public\".\"seasons\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.teams.teams_leagueId_slug_key",
+    "label": "Add unique constraint on \"teams\" (leagueId, slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "teams_leagueId_slug_key",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"teams_leagueId_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_leagueId_slug_key",
+          "public",
+          "\"public\".\"teams\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"teams_leagueId_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"teams\" ADD CONSTRAINT \"teams_leagueId_slug_key\" UNIQUE (\"leagueId\", \"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"teams_leagueId_slug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_leagueId_slug_key",
+          "public",
+          "\"public\".\"teams\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.matches.matches_awayTeamId_idx_17f82264",
+    "label": "Create index \"matches_awayTeamId_idx_17f82264\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "matches_awayTeamId_idx_17f82264",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"matches_awayTeamId_idx_17f82264\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_awayTeamId_idx_17f82264\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"matches_awayTeamId_idx_17f82264\"",
+        "sql": "CREATE INDEX \"matches_awayTeamId_idx_17f82264\" ON \"public\".\"matches\" (\"awayTeamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"matches_awayTeamId_idx_17f82264\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_awayTeamId_idx_17f82264\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.matches.matches_homeTeamId_idx_2a4bf710",
+    "label": "Create index \"matches_homeTeamId_idx_2a4bf710\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "matches_homeTeamId_idx_2a4bf710",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"matches_homeTeamId_idx_2a4bf710\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_homeTeamId_idx_2a4bf710\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"matches_homeTeamId_idx_2a4bf710\"",
+        "sql": "CREATE INDEX \"matches_homeTeamId_idx_2a4bf710\" ON \"public\".\"matches\" (\"homeTeamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"matches_homeTeamId_idx_2a4bf710\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_homeTeamId_idx_2a4bf710\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.matches.matches_seasonId_idx_aa50cbae",
+    "label": "Create index \"matches_seasonId_idx_aa50cbae\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "matches_seasonId_idx_aa50cbae",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"matches_seasonId_idx_aa50cbae\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_seasonId_idx_aa50cbae\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"matches_seasonId_idx_aa50cbae\"",
+        "sql": "CREATE INDEX \"matches_seasonId_idx_aa50cbae\" ON \"public\".\"matches\" (\"seasonId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"matches_seasonId_idx_aa50cbae\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_seasonId_idx_aa50cbae\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.matches.matches_seasonId_week_idx_2d40ddc2",
+    "label": "Create index \"matches_seasonId_week_idx_2d40ddc2\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "matches_seasonId_week_idx_2d40ddc2",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"matches_seasonId_week_idx_2d40ddc2\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_seasonId_week_idx_2d40ddc2\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"matches_seasonId_week_idx_2d40ddc2\"",
+        "sql": "CREATE INDEX \"matches_seasonId_week_idx_2d40ddc2\" ON \"public\".\"matches\" (\"seasonId\", \"week\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"matches_seasonId_week_idx_2d40ddc2\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_seasonId_week_idx_2d40ddc2\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.players.players_leagueId_idx_1296e985",
+    "label": "Create index \"players_leagueId_idx_1296e985\" on \"players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "players_leagueId_idx_1296e985",
+        "table": "players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"players_leagueId_idx_1296e985\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"players_leagueId_idx_1296e985\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"players_leagueId_idx_1296e985\"",
+        "sql": "CREATE INDEX \"players_leagueId_idx_1296e985\" ON \"public\".\"players\" (\"leagueId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"players_leagueId_idx_1296e985\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"players_leagueId_idx_1296e985\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.roster_players.roster_players_playerId_idx_710cf1aa",
+    "label": "Create index \"roster_players_playerId_idx_710cf1aa\" on \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "roster_players_playerId_idx_710cf1aa",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"roster_players_playerId_idx_710cf1aa\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players_playerId_idx_710cf1aa\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"roster_players_playerId_idx_710cf1aa\"",
+        "sql": "CREATE INDEX \"roster_players_playerId_idx_710cf1aa\" ON \"public\".\"roster_players\" (\"playerId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"roster_players_playerId_idx_710cf1aa\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players_playerId_idx_710cf1aa\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.roster_players.roster_players_seasonId_idx_aa50cbae",
+    "label": "Create index \"roster_players_seasonId_idx_aa50cbae\" on \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "roster_players_seasonId_idx_aa50cbae",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"roster_players_seasonId_idx_aa50cbae\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players_seasonId_idx_aa50cbae\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"roster_players_seasonId_idx_aa50cbae\"",
+        "sql": "CREATE INDEX \"roster_players_seasonId_idx_aa50cbae\" ON \"public\".\"roster_players\" (\"seasonId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"roster_players_seasonId_idx_aa50cbae\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players_seasonId_idx_aa50cbae\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.roster_players.roster_players_seasonId_teamId_idx_3ad84779",
+    "label": "Create index \"roster_players_seasonId_teamId_idx_3ad84779\" on \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "roster_players_seasonId_teamId_idx_3ad84779",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"roster_players_seasonId_teamId_idx_3ad84779\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players_seasonId_teamId_idx_3ad84779\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"roster_players_seasonId_teamId_idx_3ad84779\"",
+        "sql": "CREATE INDEX \"roster_players_seasonId_teamId_idx_3ad84779\" ON \"public\".\"roster_players\" (\"seasonId\", \"teamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"roster_players_seasonId_teamId_idx_3ad84779\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players_seasonId_teamId_idx_3ad84779\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.roster_players.roster_players_teamId_idx_f2b72ab3",
+    "label": "Create index \"roster_players_teamId_idx_f2b72ab3\" on \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "roster_players_teamId_idx_f2b72ab3",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"roster_players_teamId_idx_f2b72ab3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players_teamId_idx_f2b72ab3\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"roster_players_teamId_idx_f2b72ab3\"",
+        "sql": "CREATE INDEX \"roster_players_teamId_idx_f2b72ab3\" ON \"public\".\"roster_players\" (\"teamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"roster_players_teamId_idx_f2b72ab3\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"roster_players_teamId_idx_f2b72ab3\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.season_teams.season_teams_seasonId_idx_aa50cbae",
+    "label": "Create index \"season_teams_seasonId_idx_aa50cbae\" on \"season_teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "season_teams_seasonId_idx_aa50cbae",
+        "table": "season_teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"season_teams_seasonId_idx_aa50cbae\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"season_teams_seasonId_idx_aa50cbae\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"season_teams_seasonId_idx_aa50cbae\"",
+        "sql": "CREATE INDEX \"season_teams_seasonId_idx_aa50cbae\" ON \"public\".\"season_teams\" (\"seasonId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"season_teams_seasonId_idx_aa50cbae\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"season_teams_seasonId_idx_aa50cbae\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.season_teams.season_teams_teamId_idx_f2b72ab3",
+    "label": "Create index \"season_teams_teamId_idx_f2b72ab3\" on \"season_teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "season_teams_teamId_idx_f2b72ab3",
+        "table": "season_teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"season_teams_teamId_idx_f2b72ab3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"season_teams_teamId_idx_f2b72ab3\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"season_teams_teamId_idx_f2b72ab3\"",
+        "sql": "CREATE INDEX \"season_teams_teamId_idx_f2b72ab3\" ON \"public\".\"season_teams\" (\"teamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"season_teams_teamId_idx_f2b72ab3\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"season_teams_teamId_idx_f2b72ab3\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.seasons.seasons_leagueId_idx_1296e985",
+    "label": "Create index \"seasons_leagueId_idx_1296e985\" on \"seasons\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "seasons_leagueId_idx_1296e985",
+        "table": "seasons"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"seasons_leagueId_idx_1296e985\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"seasons_leagueId_idx_1296e985\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"seasons_leagueId_idx_1296e985\"",
+        "sql": "CREATE INDEX \"seasons_leagueId_idx_1296e985\" ON \"public\".\"seasons\" (\"leagueId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"seasons_leagueId_idx_1296e985\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"seasons_leagueId_idx_1296e985\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.teams.teams_leagueId_idx_1296e985",
+    "label": "Create index \"teams_leagueId_idx_1296e985\" on \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "teams_leagueId_idx_1296e985",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"teams_leagueId_idx_1296e985\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams_leagueId_idx_1296e985\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"teams_leagueId_idx_1296e985\"",
+        "sql": "CREATE INDEX \"teams_leagueId_idx_1296e985\" ON \"public\".\"teams\" (\"leagueId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"teams_leagueId_idx_1296e985\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams_leagueId_idx_1296e985\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.matches.matches_seasonId_fkey",
+    "label": "Add foreign key \"matches_seasonId_fkey\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "matches_seasonId_fkey",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"matches_seasonId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_seasonId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"matches_seasonId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"matches\"\nADD CONSTRAINT \"matches_seasonId_fkey\"\nFOREIGN KEY (\"seasonId\")\nREFERENCES \"public\".\"seasons\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"matches_seasonId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_seasonId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.matches.matches_homeTeamId_fkey",
+    "label": "Add foreign key \"matches_homeTeamId_fkey\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "matches_homeTeamId_fkey",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"matches_homeTeamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_homeTeamId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"matches_homeTeamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"matches\"\nADD CONSTRAINT \"matches_homeTeamId_fkey\"\nFOREIGN KEY (\"homeTeamId\")\nREFERENCES \"public\".\"teams\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"matches_homeTeamId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_homeTeamId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.matches.matches_awayTeamId_fkey",
+    "label": "Add foreign key \"matches_awayTeamId_fkey\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "matches_awayTeamId_fkey",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"matches_awayTeamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_awayTeamId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"matches_awayTeamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"matches\"\nADD CONSTRAINT \"matches_awayTeamId_fkey\"\nFOREIGN KEY (\"awayTeamId\")\nREFERENCES \"public\".\"teams\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"matches_awayTeamId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_awayTeamId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.players.players_leagueId_fkey",
+    "label": "Add foreign key \"players_leagueId_fkey\" on \"players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "players_leagueId_fkey",
+        "table": "players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"players_leagueId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "players_leagueId_fkey",
+          "public",
+          "\"public\".\"players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"players_leagueId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"players\"\nADD CONSTRAINT \"players_leagueId_fkey\"\nFOREIGN KEY (\"leagueId\")\nREFERENCES \"public\".\"leagues\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"players_leagueId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "players_leagueId_fkey",
+          "public",
+          "\"public\".\"players\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.roster_players.roster_players_seasonId_fkey",
+    "label": "Add foreign key \"roster_players_seasonId_fkey\" on \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "roster_players_seasonId_fkey",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"roster_players_seasonId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_seasonId_fkey",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"roster_players_seasonId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"roster_players\"\nADD CONSTRAINT \"roster_players_seasonId_fkey\"\nFOREIGN KEY (\"seasonId\")\nREFERENCES \"public\".\"seasons\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"roster_players_seasonId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_seasonId_fkey",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.roster_players.roster_players_teamId_fkey",
+    "label": "Add foreign key \"roster_players_teamId_fkey\" on \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "roster_players_teamId_fkey",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"roster_players_teamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_teamId_fkey",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"roster_players_teamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"roster_players\"\nADD CONSTRAINT \"roster_players_teamId_fkey\"\nFOREIGN KEY (\"teamId\")\nREFERENCES \"public\".\"teams\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"roster_players_teamId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_teamId_fkey",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.roster_players.roster_players_playerId_fkey",
+    "label": "Add foreign key \"roster_players_playerId_fkey\" on \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "roster_players_playerId_fkey",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"roster_players_playerId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_playerId_fkey",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"roster_players_playerId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"roster_players\"\nADD CONSTRAINT \"roster_players_playerId_fkey\"\nFOREIGN KEY (\"playerId\")\nREFERENCES \"public\".\"players\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"roster_players_playerId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_playerId_fkey",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.season_teams.season_teams_seasonId_fkey",
+    "label": "Add foreign key \"season_teams_seasonId_fkey\" on \"season_teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "season_teams_seasonId_fkey",
+        "table": "season_teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"season_teams_seasonId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "season_teams_seasonId_fkey",
+          "public",
+          "\"public\".\"season_teams\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"season_teams_seasonId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"season_teams\"\nADD CONSTRAINT \"season_teams_seasonId_fkey\"\nFOREIGN KEY (\"seasonId\")\nREFERENCES \"public\".\"seasons\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"season_teams_seasonId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "season_teams_seasonId_fkey",
+          "public",
+          "\"public\".\"season_teams\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.season_teams.season_teams_teamId_fkey",
+    "label": "Add foreign key \"season_teams_teamId_fkey\" on \"season_teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "season_teams_teamId_fkey",
+        "table": "season_teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"season_teams_teamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "season_teams_teamId_fkey",
+          "public",
+          "\"public\".\"season_teams\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"season_teams_teamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"season_teams\"\nADD CONSTRAINT \"season_teams_teamId_fkey\"\nFOREIGN KEY (\"teamId\")\nREFERENCES \"public\".\"teams\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"season_teams_teamId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "season_teams_teamId_fkey",
+          "public",
+          "\"public\".\"season_teams\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.seasons.seasons_leagueId_fkey",
+    "label": "Add foreign key \"seasons_leagueId_fkey\" on \"seasons\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "seasons_leagueId_fkey",
+        "table": "seasons"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"seasons_leagueId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "seasons_leagueId_fkey",
+          "public",
+          "\"public\".\"seasons\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"seasons_leagueId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"seasons\"\nADD CONSTRAINT \"seasons_leagueId_fkey\"\nFOREIGN KEY (\"leagueId\")\nREFERENCES \"public\".\"leagues\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"seasons_leagueId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "seasons_leagueId_fkey",
+          "public",
+          "\"public\".\"seasons\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.teams.teams_leagueId_fkey",
+    "label": "Add foreign key \"teams_leagueId_fkey\" on \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "teams_leagueId_fkey",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"teams_leagueId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_leagueId_fkey",
+          "public",
+          "\"public\".\"teams\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"teams_leagueId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"teams\"\nADD CONSTRAINT \"teams_leagueId_fkey\"\nFOREIGN KEY (\"leagueId\")\nREFERENCES \"public\".\"leagues\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"teams_leagueId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_leagueId_fkey",
+          "public",
+          "\"public\".\"teams\""
+        ]
+      }
+    ]
+  }
+]
