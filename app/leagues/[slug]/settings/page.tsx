@@ -36,7 +36,15 @@ export default async function SettingsPage({
 		.where({
 			userId: user.id,
 		})
-		.include("league")
+		.include("league", (league) =>
+	    	league.include("seasons", (season) =>
+                season.include("seasonTeams", (seasonTeam) =>
+                    seasonTeam.include("team")
+                )
+                .include("matches")
+            )
+            .include("venues")
+        )
 		.first();
 
 	if (!membership || membership.league.slug !== slug || !canManageLeague(membership.role)) {
@@ -44,6 +52,17 @@ export default async function SettingsPage({
 	}
 
     const league = membership.league;
+    const activeSeason = league.seasons.find(
+        (season) => season.active
+    );
+
+    const venues = league.venues.map((venue) => ({
+        id: venue.id,
+        name: venue.name,
+        teamCount: activeSeason.seasonTeams.filter(
+            (seasonTeam) => seasonTeam.team.venueId === venue.id
+        ).length,
+    }));
 
     return (
         <>
@@ -64,6 +83,14 @@ export default async function SettingsPage({
                         slug: league.slug,
                         theme: league.theme as ThemeKey,
                         playerStatsEnabled: league.playerStatsEnabled,
+                        venues: venues
+                    }}
+                    season={{
+                        id: activeSeason.id,
+                        name: activeSeason.name,
+                        rules: activeSeason.rules,
+                        hasSchedule: activeSeason.matches.length > 0,
+                        teams: activeSeason.seasonTeams.map((seasonTeam) => seasonTeam.team)
                     }}
                 />
                 

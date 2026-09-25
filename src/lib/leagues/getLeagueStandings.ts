@@ -14,7 +14,10 @@ export type LeagueStanding = {
 	rackPercentage: number;
 };
 
-export async function getLeagueStandings(slug: string) {
+export async function getLeagueStandings(
+	slug: string,
+	seasonSlug?: string
+) {
 	const league = await db.orm.public.League.first({
 		slug,
 	});
@@ -25,7 +28,9 @@ export async function getLeagueStandings(slug: string) {
 
 	const season = await db.orm.public.Season.first({
 		leagueId: league.id,
-		active: true,
+    	...(seasonSlug
+        	? { slug: seasonSlug }
+        	: { active: true }),
 	});
 
 	if (!season) {
@@ -35,6 +40,12 @@ export async function getLeagueStandings(slug: string) {
 			standings: [],
 		};
 	}
+
+	const seasons = await db.orm.public.Season
+		.where({
+			leagueId: league.id,
+		})
+		.all();
 
 	const seasonTeams = await db.orm.public.SeasonTeam
 		.where({
@@ -130,6 +141,7 @@ export async function getLeagueStandings(slug: string) {
     return {
 		league,
 		season,
+		seasons,
 		standings: rankedStandings,
 	};
 }

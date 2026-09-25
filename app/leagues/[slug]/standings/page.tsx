@@ -3,18 +3,25 @@ import { notFound } from "next/navigation";
 
 import { getLeagueStandings } from "@/src/lib/leagues/getLeagueStandings";
 
+import SeasonSelect from "@/app/components/SeasonSelect";
+
 type StandingsPageProps = {
 	params: Promise<{
 		slug: string;
 	}>;
+	searchParams: Promise<{
+        season?: string;
+    }>;
 };
 
 export default async function StandingsPage({
 	params,
+	searchParams,
 }: StandingsPageProps) {
 	const { slug } = await params;
+	const { season: seasonSlug } = await searchParams;
 
-	const data = await getLeagueStandings(slug);
+	const data = await getLeagueStandings(slug, seasonSlug);
 
 	if (!data) {
 		notFound();
@@ -23,6 +30,7 @@ export default async function StandingsPage({
 	const {
 		league,
 		season,
+		seasons,
 		standings,
 	} = data;
 
@@ -46,14 +54,22 @@ export default async function StandingsPage({
 
 	return (
 		<main className="mx-auto w-full max-w-7xl px-6 py-12">
-			<div>
-				<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-xl font-semibold sm:text-2xl">
-					League Standings
-				</h1>
+			<div className="flex items-center justify-between py-4 first:pt-0">
+				<div>
+					<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-xl font-semibold sm:text-2xl">
+						League Standings
+					</h1>
 
-				<p className="mt-3 text-[var(--text-muted)]">
-					{season.name} season
-				</p>
+					<p className="mt-3 text-[var(--text-muted)]">
+						{season.name} season
+					</p>
+				</div>
+				<div>
+					<SeasonSelect 
+						seasons={seasons}
+					    selectedSeason={season}
+					/>
+				</div>
 			</div>
 
 			<div className="mt-10 overflow-hidden rounded-md border border-[var(--surface-alt)] bg-[var(--surface)]">

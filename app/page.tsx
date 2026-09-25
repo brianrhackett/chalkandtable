@@ -119,7 +119,7 @@ export default function Home() {
 							Week 4 &sdot; Thursday, Oct 22
 						</div>
 						{matches.map((match) => (
-							<div className="grid grid-cols-3 border-b border-white/10 py-4">
+							<div key="{match.id}" className="grid grid-cols-3 border-b border-white/10 py-4">
 								<span>{match.homeTeam}</span>
 								<span className="text-center"> vs </span>
 								<span className="text-right">{match.awayTeam}</span>

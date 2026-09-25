@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { formatMatchDate } from "@/src/lib/formatMatchDate.ts";
 import { getLeagueSchedule } from "@/src/lib/leagues/getLeagueSchedule";
+
+import SeasonSelect from "@/app/components/SeasonSelect";
 
 type SchedulePageProps = {
 	params: Promise<{
@@ -18,13 +21,14 @@ export default async function SchedulePage({
 }: SchedulePageProps) {
 	const { slug } = await params;
     const { view } = await searchParams;
+	const { season: seasonSlug } = await searchParams;
 
 	const currentView =
 		view === "past" || view === "all"
 			? view
 			: "upcoming";
 
-	const data = await getLeagueSchedule(slug, currentView);
+	const data = await getLeagueSchedule(slug, currentView, seasonSlug);
 
 	if (!data) {
 		notFound();
@@ -33,26 +37,63 @@ export default async function SchedulePage({
 	const {
 		league,
 		season,
+		seasons,
 		weeks,
 	} = data;
 
+	const scheduleUrl = (view?: string) => {
+		const params = new URLSearchParams();
+
+		if (view) {
+			params.set("view", view);
+		}
+
+		if (seasonSlug) {
+			params.set("season", seasonSlug);
+		}
+
+		const query = params.toString();
+
+		return `/leagues/${league.slug}/schedule${query ? `?${query}` : ""}`;
+	};
+
+	const teamUrl = (teamSlug: string) => {
+		const params = new URLSearchParams();
+
+		if (seasonSlug) {
+			params.set("season", seasonSlug);
+		}
+
+		const query = params.toString();
+
+		return `/leagues/${league.slug}/teams/${teamSlug}${query ? `?${query}` : ""}`;
+	}
+
 	return (
 		<main className="mx-auto w-full max-w-7xl px-6 py-12">
-			<div>
-				<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-xl font-semibold sm:text-2xl">
-					League Schedule
-				</h1>
+			<div className="flex items-center justify-between py-4 first:pt-0">
+				<div>
+					<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-xl font-semibold sm:text-2xl">
+						League Schedule
+					</h1>
 
-				{season && (
-					<p className="mt-3 text-[var(--text-muted)]">
-						{season.name} season
-					</p>
-				)}
+					{season && (
+						<p className="mt-3 text-[var(--text-muted)]">
+							{season.name} season
+						</p>
+					)}
+				</div>
+				<div>
+					<SeasonSelect 
+						seasons={seasons}
+					    selectedSeason={season}
+					/>
+				</div>
 			</div>
 
             <div className="mt-8 flex border-b border-[var(--surface-alt)]">
                 <Link
-                    href={`/leagues/${league.slug}/schedule`}
+                    href={scheduleUrl()}
                     className={`border-b-2 px-5 py-3 text-sm font-semibold ${
                         currentView === "upcoming"
                             ? "border-[var(--accent)] text-[var(--text)]"
@@ -63,7 +104,7 @@ export default async function SchedulePage({
                 </Link>
 
                 <Link
-                    href={`/leagues/${league.slug}/schedule?view=past`}
+                    href={scheduleUrl("past")}
                     className={`border-b-2 px-5 py-3 text-sm font-semibold ${
                         currentView === "past"
                             ? "border-[var(--accent)] text-[var(--text)]"
@@ -74,7 +115,7 @@ export default async function SchedulePage({
                 </Link>
 
                 <Link
-                    href={`/leagues/${league.slug}/schedule?view=all`}
+                    href={scheduleUrl("all")}
                     className={`border-b-2 px-5 py-3 text-sm font-semibold ${
                         currentView === "all"
                             ? "border-[var(--accent)] text-[var(--text)]"
@@ -103,16 +144,7 @@ export default async function SchedulePage({
 									</p>
 
 									<h2 className="mt-1 font-[family-name:var(--font-serif)] text-2xl font-semibold">
-										{new Intl.DateTimeFormat(
-											"en-US",
-											{
-												weekday: "long",
-												month: "long",
-												day: "numeric",
-											}
-										).format(
-											new Date(week.date)
-										)}
+										{formatMatchDate(week.date)}
 									</h2>
 								</div>
 
@@ -120,7 +152,7 @@ export default async function SchedulePage({
 									<p className="text-sm text-[var(--text-muted)]">
 										Bye:{" "}
 										<Link
-											href={`/leagues/${league.slug}/teams/${week.byeTeam.slug}`}
+											href={teamUrl(week.byeTeam.slug)}
 											className="font-semibold text-[var(--text)] hover:text-[var(--accent)]"
 										>
 											{week.byeTeam.name}
@@ -136,7 +168,7 @@ export default async function SchedulePage({
 										className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5"
 									>
 										<Link
-											href={`/leagues/${league.slug}/teams/${match.awayTeam.slug}`}
+											href={teamUrl(match.awayTeam.slug)}
 											className="text-right font-[family-name:var(--font-serif)] text-lg font-semibold hover:text-[var(--accent)]"
 										>
 											{match.awayTeam.name}
@@ -144,20 +176,20 @@ export default async function SchedulePage({
 
 										<div className="min-w-16 text-center">
 											{match.status === "completed" ? (
-												<p className="font-[family-name:var(--font-mono)] text-lg font-semibold">
+												<p className="bg-[var(--accent)] rounded-lg px-4 py-2 text-[var(--surface)] font-[family-name:var(--font-mono)] text-lg font-semibold">
 													{match.awayScore}
-													{" – "}
+													&nbsp;&ndash;&nbsp;
 													{match.homeScore}
 												</p>
 											) : (
 												<p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-													at
+													@
 												</p>
 											)}
 										</div>
 
 										<Link
-											href={`/leagues/${league.slug}/teams/${match.homeTeam.slug}`}
+											href={teamUrl(match.homeTeam.slug)}
 											className="font-[family-name:var(--font-serif)] text-lg font-semibold hover:text-[var(--accent)]"
 										>
 											{match.homeTeam.name}

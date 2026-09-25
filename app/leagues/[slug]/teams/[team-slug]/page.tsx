@@ -2,26 +2,37 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
 
+import { formatMatchDate } from "@/src/lib/formatMatchDate.ts";
+
 import { getLeagueTeam } from "@/src/lib/leagues/getLeagueTeam";
+import SeasonSelect from "@/app/components/SeasonSelect";
+
 
 type TeamPageProps = {
 	params: Promise<{
 		slug: string;
 		teamSlug: string;
 	}>;
+	searchParams: Promise<{
+        season?: string;
+    }>;
 };
 
 export default async function TeamPage({
 	params,
+	searchParams,
 }: TeamPageProps) {
 	const {
 		slug,
-		teamSlug,
+		"team-slug": teamSlug,
 	} = await params;
+
+	const { season: seasonSlug } = await searchParams;
 
 	const data = await getLeagueTeam(
 		slug,
-		teamSlug
+		teamSlug,
+		seasonSlug
 	);
 
 	if (!data) {
@@ -33,6 +44,8 @@ export default async function TeamPage({
 		team,
 		venue,
 		season,
+		seasons,
+		players,
 		record,
 		upcomingMatches,
 		recentMatches,
@@ -44,29 +57,40 @@ export default async function TeamPage({
 				href={`/leagues/${league.slug}/teams`}
 				className="text-sm font-semibold text-[var(--text-muted)] transition-colors hover:text-[var(--accent)]"
 			>
-				← All Teams
+				&larr; All Teams
 			</Link>
 
 			<div className="mt-8 border-b border-[var(--surface-alt)] pb-8">
-				<p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">
-					Team
-				</p>
+				<div className="flex items-center justify-between py-4 first:pt-0">
+					<div>
+					<p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">
+						Team
+					</p>
 
-				<h1 className="mt-2 font-[family-name:var(--font-serif)] text-5xl font-semibold">
-					{team.name}
-				</h1>
+					<h1 className="mt-2 font-[family-name:var(--font-serif)] text-5xl font-semibold">
+						{team.name}
+					</h1>
 
-				{venue && (
-					<div className="mt-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
-						<MapPin
-							size={16}
-							strokeWidth={1.75}
-							className="text-[var(--accent)]"
-						/>
+					{venue && (
+						<div className="mt-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+							<MapPin
+								size={16}
+								strokeWidth={1.75}
+								className="text-[var(--accent)]"
+							/>
 
-						<span>{venue.name}</span>
+							<span>{venue.name}</span>
+						</div>
+					)}
 					</div>
-				)}
+				
+					<div>
+						<SeasonSelect 
+							seasons={seasons}
+							selectedSeason={season}
+						/>
+					</div>
+				</div>
 			</div>
 
 			{season && record && (
@@ -117,7 +141,7 @@ export default async function TeamPage({
 
 					<div className="mt-10 grid gap-8 lg:grid-cols-2">
 						<section>
-							<h2 className="font-[family-name:var(--font-serif)] text-2xl font-semibold">
+							<h2 className="font-[family-name:var(--font-serif)] text-lg text-[var(--accent)] font-semibold">
 								Upcoming
 							</h2>
 
@@ -147,15 +171,7 @@ export default async function TeamPage({
 												</div>
 
 												<p className="text-sm text-[var(--text-muted)]">
-													{new Intl.DateTimeFormat(
-														"en-US",
-														{
-															month: "short",
-															day: "numeric",
-														}
-													).format(
-														new Date(match.scheduledAt)
-													)}
+													{formatMatchDate(match.scheduledAt)}
 												</p>
 											</div>
 										))
@@ -168,7 +184,7 @@ export default async function TeamPage({
 						</section>
 
 						<section>
-							<h2 className="font-[family-name:var(--font-serif)] text-2xl font-semibold">
+							<h2 className="font-[family-name:var(--font-serif)] text-lg text-[var(--accent)] font-semibold">
 								Recent Results
 							</h2>
 
@@ -217,7 +233,7 @@ export default async function TeamPage({
 
 														<span className="font-[family-name:var(--font-mono)] text-lg font-semibold">
 															{match.teamScore}
-															{"–"}
+															&nbsp;&ndash;&nbsp;
 															{match.opponentScore}
 														</span>
 													</div>
@@ -227,6 +243,28 @@ export default async function TeamPage({
 								) : (
 									<p className="px-5 py-6 text-sm text-[var(--text-muted)]">
 										No results yet.
+									</p>
+								)}
+							</div>
+						</section>
+
+						<section>
+							<h2 className="font-[family-name:var(--font-serif)] text-lg text-[var(--accent)] font-semibold">
+								Roster
+							</h2>
+							<div className="mt-4 overflow-hidden rounded-md border border-[var(--surface-alt)] bg-[var(--surface)]">
+								{players.length ? (
+									players.map((player) => (
+										<div
+											key={player.id}
+											className="flex items-center justify-between gap-6 border-b border-[var(--surface-alt)] px-5 py-4 last:border-b-0"
+										>
+											{player.firstName} {player.lastName}
+										</div>
+									))
+								) : (
+									<p className="px-5 py-6 text-sm text-[var(--text-muted)]">
+										No players listed.
 									</p>
 								)}
 							</div>

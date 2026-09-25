@@ -1,8 +1,10 @@
 import { db } from "@/src/prisma/db";
+import { Temporal } from "@js-temporal/polyfill";
 
 export async function getLeagueTeam(
 	leagueSlug: string,
-	teamSlug: string
+	teamSlug: string,
+	seasonSlug?: string
 ) {
 	const league = await db.orm.public.League.first({
 		slug: leagueSlug,
@@ -23,7 +25,9 @@ export async function getLeagueTeam(
 
 	const season = await db.orm.public.Season.first({
 		leagueId: league.id,
-		active: true,
+    	...(seasonSlug
+        	? { slug: seasonSlug }
+        	: { active: true }),
 	});
 
 	const venue = team.venueId
@@ -43,6 +47,12 @@ export async function getLeagueTeam(
 			recentMatches: [],
 		};
 	}
+
+	const seasons = await db.orm.public.Season
+		.where({
+			leagueId: league.id,
+		})
+		.all();
 
 	const matches = await db.orm.public.Match
 		.where({
@@ -147,9 +157,11 @@ export async function getLeagueTeam(
 				match.status === "postponed"
 		)
 		.sort(
-			(a, b) =>
-				new Date(a.scheduledAt).getTime() -
-				new Date(b.scheduledAt).getTime()
+			(a, b) => 
+				Temporal.Instant.compare(
+					a.scheduledAt,
+					b.scheduledAt
+				)
 		);
 
 	const recentMatches = formattedMatches
@@ -157,19 +169,35 @@ export async function getLeagueTeam(
 			(match) => match.status === "completed"
 		)
 		.sort(
-			(a, b) =>
-				new Date(b.scheduledAt).getTime() -
-				new Date(a.scheduledAt).getTime()
+			(a, b) => 
+				Temporal.Instant.compare(
+					b.scheduledAt,
+					a.scheduledAt
+				)
 		);
 
 	const played = wins + losses;
 	const totalRacks = racksWon + racksLost;
+
+	const rosterPlayers = await db.orm.public.RosterPlayer
+		.where({
+			seasonId: season.id,
+			teamId: team.id
+		})
+		.include("player")
+		.all();
+
+	const players = rosterPlayers.map(
+		(rosterPlayer) => rosterPlayer.player
+	);
 
 	return {
 		league,
 		team,
 		venue,
 		season,
+		seasons,
+		players,
 		record: {
 			played,
 			wins,

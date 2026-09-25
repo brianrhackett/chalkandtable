@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'7abfe73664d68361b7d0899e33a9f728f10938c8da16d8e8ffe25f59550fc994'>;
+  StorageHashBase<'3a81f7510cd041b1e8e3e80adf7c0f69770b73cc6830a5e0dcd7e1bdfcf3428f'>;
 export type ExecutionHash =
   ExecutionHashBase<'81dd15edf083b34e55c50900af0d75cb844a5f49bb3aa38df66d1c9ae8c58b88'>;
 export type ProfileHash =
@@ -295,6 +295,8 @@ export type FieldOutputTypes = {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly leagueId: CodecTypes['pg/int4@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
+      readonly slug: CodecTypes['pg/text@1']['output'];
+      readonly rules: CodecTypes['pg/text@1']['output'] | null;
       readonly theme: CodecTypes['pg/text@1']['output'] | null;
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly endDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
@@ -389,6 +391,8 @@ export type FieldInputTypes = {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly leagueId: CodecTypes['pg/int4@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
+      readonly slug: CodecTypes['pg/text@1']['input'];
+      readonly rules: CodecTypes['pg/text@1']['input'] | null;
       readonly theme: CodecTypes['pg/text@1']['input'] | null;
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly endDate: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
@@ -492,6 +496,8 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly leagueId: CodecTypes['pg/int4@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
+      readonly rules: CodecTypes['pg/text@1']['output'] | null;
+      readonly slug: CodecTypes['pg/text@1']['output'];
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly theme: CodecTypes['pg/text@1']['output'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -586,6 +592,8 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly leagueId: CodecTypes['pg/int4@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
+      readonly rules: CodecTypes['pg/text@1']['input'] | null;
+      readonly slug: CodecTypes['pg/text@1']['input'];
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly theme: CodecTypes['pg/text@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -636,6 +644,8 @@ export namespace Models {
     id: CodecTypes['pg/int4@1']['output'];
     leagueId: CodecTypes['pg/int4@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
+    slug: CodecTypes['pg/text@1']['output'];
+    rules: CodecTypes['pg/text@1']['output'] | null;
     theme: CodecTypes['pg/text@1']['output'] | null;
     startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
     endDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
@@ -1337,6 +1347,16 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
+                readonly slug: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly rules: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
                 readonly theme: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
@@ -1374,7 +1394,10 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['leagueId', 'name'] }];
+              uniques: readonly [
+                { readonly columns: readonly ['leagueId', 'name'] },
+                { readonly columns: readonly ['leagueId', 'slug'] },
+              ];
               indexes: readonly [
                 {
                   readonly name: 'seasons_leagueId_idx_1296e985';
@@ -2076,6 +2099,14 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly slug: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly rules: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly theme: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -2167,6 +2198,8 @@ type ContractBase = Omit<
                 readonly id: { readonly column: 'id' };
                 readonly leagueId: { readonly column: 'leagueId' };
                 readonly name: { readonly column: 'name' };
+                readonly slug: { readonly column: 'slug' };
+                readonly rules: { readonly column: 'rules' };
                 readonly theme: { readonly column: 'theme' };
                 readonly startDate: { readonly column: 'startDate' };
                 readonly endDate: { readonly column: 'endDate' };

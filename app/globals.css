@@ -10,6 +10,8 @@
 
 	--accent: #fb2c36;
 	--accent-strong: #e7000b;
+
+	--danger: #f87171;
 }
 
 [data-theme="red-light"] {
@@ -22,6 +24,8 @@
 
 	--accent: #82181a;
 	--accent-strong: #671315;
+
+	--danger: #b91c1c;
 }
 
 [data-theme="orange-dark"] {
@@ -34,6 +38,8 @@
 
 	--accent: #ff6900;
 	--accent-strong: #f54900;
+
+	--danger: #f87171;
 }
 
 [data-theme="orange-light"] {
@@ -46,6 +52,8 @@
 
 	--accent: #9f2d00;
 	--accent-strong: #7e2a0c;
+
+	--danger: #b91c1c;
 }
 
 [data-theme="gold-dark"] {
@@ -58,6 +66,8 @@
 
 	--accent: #ffba00;
 	--accent-strong: #e5a500;
+
+	--danger: #f87171;
 }
 
 [data-theme="indigo-light"] {
@@ -70,6 +80,8 @@
 
 	--accent: #372aac;
 	--accent-strong: #432dd7;
+
+	--danger: #b91c1c;
 }
 
 [data-theme="green-dark"] {
@@ -82,6 +94,8 @@
 
 	--accent: #84cc16;
 	--accent-strong: #65a30d;
+
+	--danger: #f87171;
 }
 
 [data-theme="green-light"] {
@@ -94,6 +108,8 @@
 
 	--accent: #007a55;
 	--accent-strong: #006045;
+
+	--danger: #b91c1c;
 }
 
 [data-theme="blue-dark"] {
@@ -106,6 +122,8 @@
 
 	--accent: #00d3f2;
 	--accent-strong: #00b8db;
+
+	--danger: #f87171;
 }
 
 [data-theme="blue-light"] {
@@ -118,6 +136,8 @@
 
 	--accent: #1447e6;
 	--accent-strong: #193cb8;
+
+	--danger: #b91c1c;
 }
 
 [data-theme="purple-dark"] {
@@ -130,6 +150,8 @@
 
 	--accent: #c27aff;
 	--accent-strong: #ad46ff;
+
+	--danger: #f87171;
 }
 
 [data-theme="purple-light"] {
@@ -142,7 +164,11 @@
 
 	--accent: #6e11b0;
 	--accent-strong: #59168b;
+
+	--danger: #b91c1c;
 }
+
+
 
 
 body {
@@ -175,3 +201,24 @@ body {
 	}
 }
 
+@utility btn-danger-subtle {
+	@apply rounded-md px-3 py-2 font-semibold transition-colors cursor-pointer;
+
+	color: var(--danger);
+
+	&:hover {
+		background-color: color-mix(in srgb, var(--danger) 12%, transparent);
+	}
+}
+
+@utility form-input {
+	@apply w-full rounded-md border px-3 py-2 outline-none transition-colors;
+
+	background-color: transparent;
+	border-color: color-mix(in srgb, var(--text-color) 25%, transparent);
+	color: var(--text-color);
+
+	&:focus {
+		border-color: var(--accent);
+	}
+}

@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/auth";
-import LeagueFooter from "./LeagueFooter";
-import LeagueHeader from "./LeagueHeader";
-import LeagueNav from "./LeagueNav";
+import LeagueFooter from "./layout/LeagueFooter";
+import LeagueHeader from "./layout/LeagueHeader";
+import LeagueNav from "./layout/LeagueNav";
 import { db } from "@/src/prisma/db";
 
 type LeagueLayoutProps = {

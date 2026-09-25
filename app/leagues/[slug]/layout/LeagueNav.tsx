@@ -18,7 +18,7 @@ export default function LeagueNav({
 }: LeagueNavProps) {
 	const baseUrl = `/leagues/${league.slug}`;
 	const pathname = usePathname();
-	console.log(pathname);
+
 	const links = [
 		{
 			label: "Home",
@@ -36,42 +36,42 @@ export default function LeagueNav({
 			label: "Teams",
 			href: `${baseUrl}/teams`,
 		},
+		{
+			label: "Players",
+			href: `${baseUrl}/players`,
+			requiresPlayerStats: true
+		},
+		{
+			label: "Rules",
+			href: `${baseUrl}/rules`,
+		}
 	];
 
 	return (
 		<nav className="border-b border-[var(--surface-alt)] bg-[var(--surface)]">
 			<div className="mx-auto flex max-w-7xl items-center gap-7 overflow-x-auto px-6">
-				{links.map((link) => {
-					const isActive = pathname === link.href;
-
-					return (
-						<Link
-							key={link.href}
-							href={link.href}
-							className={`whitespace-nowrap border-b-2 py-4 text-sm font-semibold transition-colors ${
-								isActive
-									? "border-[var(--accent)] text-[var(--accent)]"
-									: "border-transparent text-[var(--text-muted)] hover:text-[var(--text)]"
-								}`}
-						>
-							{link.label}
-						</Link>
+				{links.filter((link) =>
+						!link.requiresPlayerStats ||
+						league.playerStatsEnabled
 					)
-					
-				})}
+					.map((link) => {
+						const isActive = pathname === link.href;
 
-                {league.playerStatsEnabled && (
-                    <Link
-                        href={`${baseUrl}/players`}
-                        className={`whitespace-nowrap border-b-2 py-4 text-sm font-semibold transition-colors ${
-								pathname === `${baseUrl}/players`
-									? "border-[var(--accent)] text-[var(--accent)]"
-									: "border-transparent text-[var(--text-muted)] hover:text-[var(--text)]"
-								}`}
-					>
-                        Players
-                    </Link>
-                )}
+						return (
+							<Link
+								key={link.href}
+								href={link.href}
+								className={`whitespace-nowrap border-b-2 py-4 text-sm font-semibold transition-colors ${
+									isActive
+										? "border-[var(--accent)] text-[var(--accent)]"
+										: "border-transparent text-[var(--text-muted)] hover:text-[var(--text)]"
+									}`}
+							>
+								{link.label}
+							</Link>
+						)	
+					})
+				}
 
 				{role && canManageLeague(role) && (
 					<Link

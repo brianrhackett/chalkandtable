@@ -791,6 +791,20 @@
                   "kind": "scalar"
                 }
               },
+              "rules": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "slug": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "startDate": {
                 "nullable": true,
                 "type": {
@@ -895,6 +909,12 @@
                 },
                 "name": {
                   "column": "name"
+                },
+                "rules": {
+                  "column": "rules"
+                },
+                "slug": {
+                  "column": "slug"
                 },
                 "startDate": {
                   "column": "startDate"
@@ -2097,6 +2117,16 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "rules": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "slug": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "startDate": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "nativeType": "timestamptz",
@@ -2152,6 +2182,12 @@
                   "columns": [
                     "leagueId",
                     "name"
+                  ]
+                },
+                {
+                  "columns": [
+                    "leagueId",
+                    "slug"
                   ]
                 }
               ]
@@ -2421,7 +2457,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "7abfe73664d68361b7d0899e33a9f728f10938c8da16d8e8ffe25f59550fc994"
+    "storageHash": "3a81f7510cd041b1e8e3e80adf7c0f69770b73cc6830a5e0dcd7e1bdfcf3428f"
   },
   "execution": {
     "executionHash": "81dd15edf083b34e55c50900af0d75cb844a5f49bb3aa38df66d1c9ae8c58b88",

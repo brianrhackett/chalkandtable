@@ -15,16 +15,22 @@ type TeamCardProps = {
 		percentage: number;
 	};
 	leagueSlug: string;
+    seasonSlug?: string;
 };
 
-export default function Card({
+export default function TeamCard({
     team,
 	leagueSlug,
+    seasonSlug,
 }: TeamCardProps) {
+    const href =
+        `/leagues/${leagueSlug}/teams/${team.slug}` +
+        (seasonSlug ? `?season=${seasonSlug}` : "");
+
     return (
         <Link
             key={team.id}
-            href={`/leagues/${leagueSlug}/teams/${team.slug}`}
+            href={href}
             className="group rounded-md border border-[var(--surface-alt)] bg-[var(--surface)] p-6 transition-colors hover:border-[var(--accent)]"
         >
             <div className="flex min-h-32">

@@ -33,7 +33,6 @@ export default async function DashboardPage() {
     	)
         .all();
 
-    console.log(memberships)
 	return (
         <>
             <Header />

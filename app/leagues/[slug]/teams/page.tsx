@@ -2,18 +2,25 @@ import { notFound } from "next/navigation";
 
 import { getLeagueTeams } from "@/src/lib/leagues/getLeagueTeams";
 import TeamCard from "@/app/components/TeamCard";
+import SeasonSelect from "@/app/components/SeasonSelect";
+
 type TeamsPageProps = {
 	params: Promise<{
 		slug: string;
 	}>;
+	searchParams: Promise<{
+        season?: string;
+    }>;
 };
 
 export default async function TeamsPage({
     params,
+	searchParams
 }: TeamsPageProps) {
 	const { slug } = await params;
+	const { season: seasonSlug } = await searchParams;
 
-	const data = await getLeagueTeams(slug);
+	const data = await getLeagueTeams(slug, seasonSlug);
 
 	if (!data) {
 		notFound();
@@ -22,6 +29,7 @@ export default async function TeamsPage({
 	const {
 		league,
 		season,
+		seasons,
 		teams,
 	} = data;
 
@@ -52,6 +60,12 @@ export default async function TeamsPage({
 						{season.name} season.
 					</p>
 				</div>
+				<div>
+					<SeasonSelect 
+						seasons={seasons}
+					    selectedSeason={season}
+					/>
+				</div>
 			</div>
 
 			<div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -60,6 +74,7 @@ export default async function TeamsPage({
                         key={team.id}
                         team={team}
                         leagueSlug={league.slug}
+						seasonSlug={seasonSlug}
                     />
 				))}
 			</div>

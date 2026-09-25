@@ -1,182 +1,185 @@
 // use prisma-8
 model League {
-	id                 	Int                 @id @default(autoincrement())
-	name               	String
-	slug               	String              @unique
-	theme              	String   			@default("green-dark")
-	playerStatsEnabled 	Boolean            	@default(false)
-	createdAt          	TimestamptzString   @default(now())
-	updatedAt          	temporal.updatedAtString()
+  id                 Int                        @id @default(autoincrement())
+  name               String
+  slug               String                     @unique
+  theme              String                     @default("green-dark")
+  playerStatsEnabled Boolean                    @default(false)
+  createdAt          TimestamptzString          @default(now())
+  updatedAt          temporal.updatedAtString()
 
-	seasons            	Season[]
-	teams              	Team[]
-	players            	Player[]
-	venues 				Venue[]
+  seasons            Season[]
+  teams              Team[]
+  players            Player[]
+  venues             Venue[]
 
-	@@map("leagues")
+  @@map("leagues")
 }
 
 model Season {
-	id          Int                  @id @default(autoincrement())
-	leagueId    Int
-	name        String
-	theme		String?
-	startDate   DateTime?
-	endDate     DateTime?
-	active      Boolean              @default(false)
-	createdAt   TimestamptzString    @default(now())
-	updatedAt   temporal.updatedAtString()
+  id          	Int                        	@id @default(autoincrement())
+  leagueId    	Int
+  name        	String
+  slug		  	String
+  rules       	String?
+  theme       	String?
+  startDate   	DateTime?
+  endDate     	DateTime?
+  active      	Boolean                    	@default(false)
+  createdAt   	TimestamptzString          	@default(now())
+  updatedAt   	temporal.updatedAtString()
 
-	league      League               @relation(fields:[leagueId], references:[id], onDelete: Cascade)
-	seasonTeams SeasonTeam[]
-	rosters     RosterPlayer[]
-	matches     Match[]
+  league      League                     	@relation(fields:[leagueId], references:[id], onDelete: Cascade)
+  seasonTeams SeasonTeam[]
+  rosters     RosterPlayer[]
+  matches     Match[]
 
-	@@unique([leagueId, name])
-	@@map("seasons")
+  @@unique([leagueId, name])
+  @@unique([leagueId, slug])
+  @@map("seasons")
 }
 
 model Team {
-	id          Int                 @id @default(autoincrement())
-	leagueId    Int
-	name        String
-	slug        String
-	createdAt   TimestamptzString   @default(now())
-	updatedAt   temporal.updatedAtString()
-	venueId 	Int?
+  id          Int                        @id @default(autoincrement())
+  leagueId    Int
+  name        String
+  slug        String
+  createdAt   TimestamptzString          @default(now())
+  updatedAt   temporal.updatedAtString()
+  venueId     Int?
 
-	league      League              @relation(fields:[leagueId], references:[id], onDelete: Cascade)
-	seasonTeams SeasonTeam[]
-	rosterSpots RosterPlayer[]
-	venue 		Venue? 				@relation(fields: [venueId], references: [id])
+  league      League                     @relation(fields:[leagueId], references:[id], onDelete: Cascade)
+  seasonTeams SeasonTeam[]
+  rosterSpots RosterPlayer[]
+  venue       Venue?                     @relation(fields:[venueId], references:[id])
 
-	homeMatches Match[]             @relation("HomeTeam")
-	awayMatches Match[]             @relation("AwayTeam")
+  homeMatches Match[]                    @relation("HomeTeam")
+  awayMatches Match[]                    @relation("AwayTeam")
 
-	@@unique([leagueId, slug])
-	@@map("teams")
+  @@unique([leagueId, slug])
+  @@map("teams")
 }
 
 model Player {
-	id          Int                  @id @default(autoincrement())
-	leagueId    Int
-	firstName   String
-	lastName    String
-	email       String?
-	active      Boolean              @default(true)
-	createdAt   TimestamptzString    @default(now())
-	updatedAt   temporal.updatedAtString()
+  id          Int                        @id @default(autoincrement())
+  leagueId    Int
+  firstName   String
+  lastName    String
+  email       String?
+  active      Boolean                    @default(true)
+  createdAt   TimestamptzString          @default(now())
+  updatedAt   temporal.updatedAtString()
 
-	league      League               @relation(fields:[leagueId], references:[id], onDelete: Cascade)
-	rosterSpots RosterPlayer[]
+  league      League                     @relation(fields:[leagueId], references:[id], onDelete: Cascade)
+  rosterSpots RosterPlayer[]
 
-	@@index([leagueId])
-	@@map("players")
+  @@index([leagueId])
+  @@map("players")
 }
 
 model SeasonTeam {
-	id        Int      			@id @default(autoincrement())
-	seasonId  Int
-	teamId    Int
-	createdAt TimestamptzString	@default(now())
+  id        Int               @id @default(autoincrement())
+  seasonId  Int
+  teamId    Int
+  createdAt TimestamptzString @default(now())
 
-	season    Season   			@relation(fields:[seasonId], references:[id], onDelete: Cascade)
-	team      Team    		 	@relation(fields:[teamId], references:[id], onDelete: Cascade)
+  season    Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  team      Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
 
-	@@unique([seasonId, teamId])
-	@@map("season_teams")
+  @@unique([seasonId, teamId])
+  @@map("season_teams")
 }
 
 model RosterPlayer {
-	id        Int       			@id @default(autoincrement())
-	seasonId  Int
-	teamId    Int
-	playerId  Int
-	active    Boolean   			@default(true)
-	joinedAt  DateTime?
-	leftAt    DateTime?
-	createdAt TimestamptzString	@default(now())
+  id        Int               @id @default(autoincrement())
+  seasonId  Int
+  teamId    Int
+  playerId  Int
+  active    Boolean           @default(true)
+  joinedAt  DateTime?
+  leftAt    DateTime?
+  createdAt TimestamptzString @default(now())
 
-	season    Season    			@relation(fields:[seasonId], references:[id], onDelete: Cascade)
-	team      Team      			@relation(fields:[teamId], references:[id], onDelete: Cascade)
-	player    Player    			@relation(fields:[playerId], references:[id], onDelete: Cascade)
+  season    Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  team      Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
+  player    Player            @relation(fields:[playerId], references:[id], onDelete: Cascade)
 
-	@@unique([seasonId, playerId])
-	@@index([seasonId, teamId])
-	@@map("roster_players")
+  @@unique([seasonId, playerId])
+  @@index([seasonId, teamId])
+  @@map("roster_players")
 }
 
 model Match {
-	id          Int                  @id @default(autoincrement())
-	seasonId    Int
-	week        Int
-	homeTeamId  Int
-	awayTeamId  Int
-	scheduledAt DateTime
-	status      MatchStatus          @default(Scheduled)
+  id          Int                        @id @default(autoincrement())
+  seasonId    Int
+  week        Int
+  homeTeamId  Int
+  awayTeamId  Int
+  scheduledAt DateTime
+  status      MatchStatus                @default(Scheduled)
 
-	homeScore   Int?
-	awayScore   Int?
+  homeScore   Int?
+  awayScore   Int?
 
-	createdAt   TimestamptzString    @default(now())
-	updatedAt   temporal.updatedAtString()
+  createdAt   TimestamptzString          @default(now())
+  updatedAt   temporal.updatedAtString()
 
-	season      Season               @relation(fields:[seasonId], references:[id], onDelete: Cascade)
-	homeTeam    Team                 @relation("HomeTeam", fields:[homeTeamId], references:[id])
-	awayTeam    Team                 @relation("AwayTeam", fields:[awayTeamId], references:[id])
+  season      Season                     @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  homeTeam    Team                       @relation("HomeTeam", fields:[homeTeamId], references:[id])
+  awayTeam    Team                       @relation("AwayTeam", fields:[awayTeamId], references:[id])
 
-	@@index([seasonId, week])
-	@@index([homeTeamId])
-	@@index([awayTeamId])
-	@@map("matches")
+  @@index([seasonId, week])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
+  @@map("matches")
 }
 
 enum MatchStatus {
-	@@type("pg/text@1")
+  @@type("pg/text@1")
 
-	Scheduled = "scheduled"
-	Completed = "completed"
-	Postponed = "postponed"
-	Cancelled = "cancelled"
+  Scheduled = "scheduled"
+  Completed = "completed"
+  Postponed = "postponed"
+  Cancelled = "cancelled"
 }
 
 model Venue {
-	id        	Int      	@id @default(autoincrement())
-	leagueId  	Int
-	name      	String
-	createdAt 	TimestamptzString @default(now())
-	updatedAt 	temporal.updatedAtString()
+  id        Int                        @id @default(autoincrement())
+  leagueId  Int
+  name      String
+  createdAt TimestamptzString          @default(now())
+  updatedAt temporal.updatedAtString()
 
-	league 		League 		@relation(fields: [leagueId], references: [id], onDelete: Cascade)
-	teams  		Team[]
+  league    League                     @relation(fields:[leagueId], references:[id], onDelete: Cascade)
+  teams     Team[]
 
-	@@unique([leagueId, name])
-	@@map("venues")	
+  @@unique([leagueId, name])
+  @@map("venues")
 }
 
 model User {
-	id        	Int					@id @default(autoincrement())
-	name      	String
-	email     	String   			@unique
-	password  	String
-	createdAt 	TimestamptzString 	@default(now())
-	updatedAt 	temporal.updatedAtString()
+  id        Int                        @id @default(autoincrement())
+  name      String
+  email     String                     @unique
+  password  String
+  createdAt TimestamptzString          @default(now())
+  updatedAt temporal.updatedAtString()
 
-	leagues 	LeagueUser[]
+  leagues   LeagueUser[]
 
-	@@map("users")
+  @@map("users")
 }
 
 model LeagueUser {
-	id        	Int      			@id @default(autoincrement())
-	userId    	Int
-	leagueId  	Int
-	role      	String
-	createdAt 	TimestamptzString 	@default(now())
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  leagueId  Int
+  role      String
+  createdAt TimestamptzString @default(now())
 
-	user   		User   				@relation(fields: [userId], references: [id], onDelete: Cascade)
-	league 		League 				@relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields:[userId], references:[id], onDelete: Cascade)
+  league    League            @relation(fields:[leagueId], references:[id], onDelete: Cascade)
 
-	@@unique([userId, leagueId])
-	@@map("league_users")
+  @@unique([userId, leagueId])
+  @@map("league_users")
 }
