@@ -20,6 +20,14 @@
       "model": "Player",
       "namespace": "public"
     },
+    "playoff_series": {
+      "model": "PlayoffSeries",
+      "namespace": "public"
+    },
+    "playoffs": {
+      "model": "Playoff",
+      "namespace": "public"
+    },
     "roster_players": {
       "model": "RosterPlayer",
       "namespace": "public"
@@ -67,6 +75,23 @@
               {
                 "name": "Cancelled",
                 "value": "cancelled"
+              }
+            ]
+          },
+          "PlayoffRound": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "Quarterfinal",
+                "value": "Quarterfinal"
+              },
+              {
+                "name": "Semifinal",
+                "value": "Semifinal"
+              },
+              {
+                "name": "Final",
+                "value": "Final"
               }
             ]
           }
@@ -352,6 +377,13 @@
                   "kind": "scalar"
                 }
               },
+              "playoffSeriesId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "scheduledAt": {
                 "nullable": false,
                 "type": {
@@ -361,6 +393,13 @@
               },
               "seasonId": {
                 "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "seriesMatch": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
@@ -387,7 +426,7 @@
                 }
               },
               "week": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
@@ -424,6 +463,22 @@
                 },
                 "to": {
                   "model": "Team",
+                  "namespace": "public"
+                }
+              },
+              "playoffSeries": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "playoffSeriesId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "PlayoffSeries",
                   "namespace": "public"
                 }
               },
@@ -464,11 +519,17 @@
                 "id": {
                   "column": "id"
                 },
+                "playoffSeriesId": {
+                  "column": "playoffSeriesId"
+                },
                 "scheduledAt": {
                   "column": "scheduledAt"
                 },
                 "seasonId": {
                   "column": "seasonId"
+                },
+                "seriesMatch": {
+                  "column": "seriesMatch"
                 },
                 "status": {
                   "column": "status"
@@ -605,6 +666,326 @@
               },
               "namespaceId": "public",
               "table": "players"
+            }
+          },
+          "Playoff": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "reseed": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "seasonId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "teamCount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "season": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "seasonId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Season",
+                  "namespace": "public"
+                }
+              },
+              "series": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "playoffId"
+                  ]
+                },
+                "to": {
+                  "model": "PlayoffSeries",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "reseed": {
+                  "column": "reseed"
+                },
+                "seasonId": {
+                  "column": "seasonId"
+                },
+                "teamCount": {
+                  "column": "teamCount"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "playoffs"
+            }
+          },
+          "PlayoffSeries": {
+            "fields": {
+              "bestOf": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "higherSeed": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "higherSeedTeamId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "lowerSeed": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "lowerSeedTeamId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "playoffId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "round": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "PlayoffRound",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "seasonId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "seriesNumber": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "higherSeedTeam": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "higherSeedTeamId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Team",
+                  "namespace": "public"
+                }
+              },
+              "lowerSeedTeam": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "lowerSeedTeamId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Team",
+                  "namespace": "public"
+                }
+              },
+              "matches": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "playoffSeriesId"
+                  ]
+                },
+                "to": {
+                  "model": "Match",
+                  "namespace": "public"
+                }
+              },
+              "playoff": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "playoffId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Playoff",
+                  "namespace": "public"
+                }
+              },
+              "season": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "seasonId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Season",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "bestOf": {
+                  "column": "bestOf"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "higherSeed": {
+                  "column": "higherSeed"
+                },
+                "higherSeedTeamId": {
+                  "column": "higherSeedTeamId"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "lowerSeed": {
+                  "column": "lowerSeed"
+                },
+                "lowerSeedTeamId": {
+                  "column": "lowerSeedTeamId"
+                },
+                "playoffId": {
+                  "column": "playoffId"
+                },
+                "round": {
+                  "column": "round"
+                },
+                "seasonId": {
+                  "column": "seasonId"
+                },
+                "seriesNumber": {
+                  "column": "seriesNumber"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "playoff_series"
             }
           },
           "RosterPlayer": {
@@ -799,7 +1180,7 @@
                 }
               },
               "slug": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -856,6 +1237,21 @@
                 },
                 "to": {
                   "model": "Match",
+                  "namespace": "public"
+                }
+              },
+              "playoffSeries": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "seasonId"
+                  ]
+                },
+                "to": {
+                  "model": "PlayoffSeries",
                   "namespace": "public"
                 }
               },
@@ -1082,6 +1478,21 @@
                   "namespace": "public"
                 }
               },
+              "higherSeedSeries": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "higherSeedTeamId"
+                  ]
+                },
+                "to": {
+                  "model": "PlayoffSeries",
+                  "namespace": "public"
+                }
+              },
               "homeMatches": {
                 "cardinality": "1:N",
                 "on": {
@@ -1110,6 +1521,21 @@
                 },
                 "to": {
                   "model": "League",
+                  "namespace": "public"
+                }
+              },
+              "lowerSeedSeries": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "lowerSeedTeamId"
+                  ]
+                },
+                "to": {
+                  "model": "PlayoffSeries",
                   "namespace": "public"
                 }
               },
@@ -1597,6 +2023,11 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "playoffSeriesId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
                 "scheduledAt": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "nativeType": "timestamptz",
@@ -1606,6 +2037,11 @@
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
+                },
+                "seriesMatch": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
                 },
                 "status": {
                   "codecId": "pg/text@1",
@@ -1630,7 +2066,7 @@
                 "week": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
-                  "nullable": false
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -1682,6 +2118,23 @@
                     "namespaceId": "public",
                     "tableName": "teams"
                   }
+                },
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "playoffSeriesId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "matches"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "playoff_series"
+                  }
                 }
               ],
               "indexes": [
@@ -1699,6 +2152,14 @@
                   ],
                   "name": "matches_homeTeamId_idx_2a4bf710",
                   "prefix": "matches_homeTeamId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "playoffSeriesId"
+                  ],
+                  "name": "matches_playoffSeriesId_idx_e438d1a0",
+                  "prefix": "matches_playoffSeriesId_idx",
                   "unique": false
                 },
                 {
@@ -1816,6 +2277,285 @@
                 ]
               },
               "uniques": []
+            },
+            "playoff_series": {
+              "checks": [
+                {
+                  "expression": "\"round\" IN ('Quarterfinal', 'Semifinal', 'Final')",
+                  "name": "playoff_series_round_check_59ed4e16",
+                  "prefix": "playoff_series_round_check"
+                }
+              ],
+              "columns": {
+                "bestOf": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "higherSeed": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "higherSeedTeamId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "lowerSeed": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "lowerSeedTeamId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "playoffId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "round": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "PlayoffRound",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "seasonId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "seriesNumber": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "seasonId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "playoff_series"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "seasons"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "higherSeedTeamId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "playoff_series"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "teams"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "lowerSeedTeamId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "playoff_series"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "teams"
+                  }
+                },
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "playoffId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "playoff_series"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "playoffs"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "higherSeedTeamId"
+                  ],
+                  "name": "playoff_series_higherSeedTeamId_idx_c260ad05",
+                  "prefix": "playoff_series_higherSeedTeamId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "lowerSeedTeamId"
+                  ],
+                  "name": "playoff_series_lowerSeedTeamId_idx_1987badf",
+                  "prefix": "playoff_series_lowerSeedTeamId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "playoffId"
+                  ],
+                  "name": "playoff_series_playoffId_idx_15ca42b5",
+                  "prefix": "playoff_series_playoffId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "seasonId"
+                  ],
+                  "name": "playoff_series_seasonId_idx_aa50cbae",
+                  "prefix": "playoff_series_seasonId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "seasonId",
+                    "round",
+                    "seriesNumber"
+                  ]
+                }
+              ]
+            },
+            "playoffs": {
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "reseed": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "seasonId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "teamCount": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "seasonId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "playoffs"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "seasons"
+                  }
+                }
+              ],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "seasonId"
+                  ]
+                }
+              ]
             },
             "roster_players": {
               "columns": {
@@ -2125,7 +2865,7 @@
                 "slug": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
-                  "nullable": false
+                  "nullable": true
                 },
                 "startDate": {
                   "codecId": "pg/timestamptz-temporal@1",
@@ -2182,12 +2922,6 @@
                   "columns": [
                     "leagueId",
                     "name"
-                  ]
-                },
-                {
-                  "columns": [
-                    "leagueId",
-                    "slug"
                   ]
                 }
               ]
@@ -2450,6 +3184,14 @@
                 "postponed",
                 "cancelled"
               ]
+            },
+            "PlayoffRound": {
+              "kind": "valueSet",
+              "values": [
+                "Quarterfinal",
+                "Semifinal",
+                "Final"
+              ]
             }
           }
         },
@@ -2457,10 +3199,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "3a81f7510cd041b1e8e3e80adf7c0f69770b73cc6830a5e0dcd7e1bdfcf3428f"
+    "storageHash": "e3d6d875c872984850683ba97c7a279a27ec156c9b52b24f865614d43e377d8c"
   },
   "execution": {
-    "executionHash": "81dd15edf083b34e55c50900af0d75cb844a5f49bb3aa38df66d1c9ae8c58b88",
+    "executionHash": "de5ba59fdfe6d047de366fb7d146871bfe55f4585ce12a281adbf2d887e88813",
     "mutations": {
       "defaults": [
         {
@@ -2506,6 +3248,36 @@
             "column": "updatedAt",
             "namespace": "public",
             "table": "players"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "updatedAt",
+            "namespace": "public",
+            "table": "playoff_series"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "updatedAt",
+            "namespace": "public",
+            "table": "playoffs"
           }
         },
         {

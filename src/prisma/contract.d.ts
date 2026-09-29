@@ -34,9 +34,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'3a81f7510cd041b1e8e3e80adf7c0f69770b73cc6830a5e0dcd7e1bdfcf3428f'>;
+  StorageHashBase<'e3d6d875c872984850683ba97c7a279a27ec156c9b52b24f865614d43e377d8c'>;
 export type ExecutionHash =
-  ExecutionHashBase<'81dd15edf083b34e55c50900af0d75cb844a5f49bb3aa38df66d1c9ae8c58b88'>;
+  ExecutionHashBase<'de5ba59fdfe6d047de366fb7d146871bfe55f4585ce12a281adbf2d887e88813'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -261,13 +261,15 @@ export type FieldOutputTypes = {
     readonly Match: {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly seasonId: CodecTypes['pg/int4@1']['output'];
-      readonly week: CodecTypes['pg/int4@1']['output'];
+      readonly week: CodecTypes['pg/int4@1']['output'] | null;
       readonly homeTeamId: CodecTypes['pg/int4@1']['output'];
       readonly awayTeamId: CodecTypes['pg/int4@1']['output'];
       readonly scheduledAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly status: 'scheduled' | 'completed' | 'postponed' | 'cancelled';
       readonly homeScore: CodecTypes['pg/int4@1']['output'] | null;
       readonly awayScore: CodecTypes['pg/int4@1']['output'] | null;
+      readonly playoffSeriesId: CodecTypes['pg/int4@1']['output'] | null;
+      readonly seriesMatch: CodecTypes['pg/int4@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
@@ -278,6 +280,28 @@ export type FieldOutputTypes = {
       readonly lastName: CodecTypes['pg/text@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'] | null;
       readonly active: CodecTypes['pg/bool@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    };
+    readonly Playoff: {
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly seasonId: CodecTypes['pg/int4@1']['output'];
+      readonly teamCount: CodecTypes['pg/int4@1']['output'];
+      readonly reseed: CodecTypes['pg/bool@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    };
+    readonly PlayoffSeries: {
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly seasonId: CodecTypes['pg/int4@1']['output'];
+      readonly round: 'Quarterfinal' | 'Semifinal' | 'Final';
+      readonly seriesNumber: CodecTypes['pg/int4@1']['output'];
+      readonly higherSeedTeamId: CodecTypes['pg/int4@1']['output'];
+      readonly higherSeed: CodecTypes['pg/int4@1']['output'];
+      readonly lowerSeedTeamId: CodecTypes['pg/int4@1']['output'];
+      readonly lowerSeed: CodecTypes['pg/int4@1']['output'];
+      readonly bestOf: CodecTypes['pg/int4@1']['output'];
+      readonly playoffId: CodecTypes['pg/int4@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
@@ -295,7 +319,7 @@ export type FieldOutputTypes = {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly leagueId: CodecTypes['pg/int4@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-      readonly slug: CodecTypes['pg/text@1']['output'];
+      readonly slug: CodecTypes['pg/text@1']['output'] | null;
       readonly rules: CodecTypes['pg/text@1']['output'] | null;
       readonly theme: CodecTypes['pg/text@1']['output'] | null;
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
@@ -357,13 +381,15 @@ export type FieldInputTypes = {
     readonly Match: {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly seasonId: CodecTypes['pg/int4@1']['input'];
-      readonly week: CodecTypes['pg/int4@1']['input'];
+      readonly week: CodecTypes['pg/int4@1']['input'] | null;
       readonly homeTeamId: CodecTypes['pg/int4@1']['input'];
       readonly awayTeamId: CodecTypes['pg/int4@1']['input'];
       readonly scheduledAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly status: 'scheduled' | 'completed' | 'postponed' | 'cancelled';
       readonly homeScore: CodecTypes['pg/int4@1']['input'] | null;
       readonly awayScore: CodecTypes['pg/int4@1']['input'] | null;
+      readonly playoffSeriesId: CodecTypes['pg/int4@1']['input'] | null;
+      readonly seriesMatch: CodecTypes['pg/int4@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
@@ -374,6 +400,28 @@ export type FieldInputTypes = {
       readonly lastName: CodecTypes['pg/text@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'] | null;
       readonly active: CodecTypes['pg/bool@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    };
+    readonly Playoff: {
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly seasonId: CodecTypes['pg/int4@1']['input'];
+      readonly teamCount: CodecTypes['pg/int4@1']['input'];
+      readonly reseed: CodecTypes['pg/bool@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    };
+    readonly PlayoffSeries: {
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly seasonId: CodecTypes['pg/int4@1']['input'];
+      readonly round: 'Quarterfinal' | 'Semifinal' | 'Final';
+      readonly seriesNumber: CodecTypes['pg/int4@1']['input'];
+      readonly higherSeedTeamId: CodecTypes['pg/int4@1']['input'];
+      readonly higherSeed: CodecTypes['pg/int4@1']['input'];
+      readonly lowerSeedTeamId: CodecTypes['pg/int4@1']['input'];
+      readonly lowerSeed: CodecTypes['pg/int4@1']['input'];
+      readonly bestOf: CodecTypes['pg/int4@1']['input'];
+      readonly playoffId: CodecTypes['pg/int4@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
@@ -391,7 +439,7 @@ export type FieldInputTypes = {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly leagueId: CodecTypes['pg/int4@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-      readonly slug: CodecTypes['pg/text@1']['input'];
+      readonly slug: CodecTypes['pg/text@1']['input'] | null;
       readonly rules: CodecTypes['pg/text@1']['input'] | null;
       readonly theme: CodecTypes['pg/text@1']['input'] | null;
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
@@ -457,11 +505,13 @@ export type StorageColumnTypes = {
       readonly homeScore: CodecTypes['pg/int4@1']['output'] | null;
       readonly homeTeamId: CodecTypes['pg/int4@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly playoffSeriesId: CodecTypes['pg/int4@1']['output'] | null;
       readonly scheduledAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly seasonId: CodecTypes['pg/int4@1']['output'];
+      readonly seriesMatch: CodecTypes['pg/int4@1']['output'] | null;
       readonly status: 'scheduled' | 'completed' | 'postponed' | 'cancelled';
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly week: CodecTypes['pg/int4@1']['output'];
+      readonly week: CodecTypes['pg/int4@1']['output'] | null;
     };
     readonly players: {
       readonly active: CodecTypes['pg/bool@1']['output'];
@@ -471,6 +521,28 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly lastName: CodecTypes['pg/text@1']['output'];
       readonly leagueId: CodecTypes['pg/int4@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    };
+    readonly playoff_series: {
+      readonly bestOf: CodecTypes['pg/int4@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly higherSeed: CodecTypes['pg/int4@1']['output'];
+      readonly higherSeedTeamId: CodecTypes['pg/int4@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly lowerSeed: CodecTypes['pg/int4@1']['output'];
+      readonly lowerSeedTeamId: CodecTypes['pg/int4@1']['output'];
+      readonly playoffId: CodecTypes['pg/int4@1']['output'];
+      readonly round: 'Quarterfinal' | 'Semifinal' | 'Final';
+      readonly seasonId: CodecTypes['pg/int4@1']['output'];
+      readonly seriesNumber: CodecTypes['pg/int4@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    };
+    readonly playoffs: {
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly reseed: CodecTypes['pg/bool@1']['output'];
+      readonly seasonId: CodecTypes['pg/int4@1']['output'];
+      readonly teamCount: CodecTypes['pg/int4@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
     readonly roster_players: {
@@ -497,7 +569,7 @@ export type StorageColumnTypes = {
       readonly leagueId: CodecTypes['pg/int4@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly rules: CodecTypes['pg/text@1']['output'] | null;
-      readonly slug: CodecTypes['pg/text@1']['output'];
+      readonly slug: CodecTypes['pg/text@1']['output'] | null;
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly theme: CodecTypes['pg/text@1']['output'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -553,11 +625,13 @@ export type StorageColumnInputTypes = {
       readonly homeScore: CodecTypes['pg/int4@1']['input'] | null;
       readonly homeTeamId: CodecTypes['pg/int4@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly playoffSeriesId: CodecTypes['pg/int4@1']['input'] | null;
       readonly scheduledAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly seasonId: CodecTypes['pg/int4@1']['input'];
+      readonly seriesMatch: CodecTypes['pg/int4@1']['input'] | null;
       readonly status: 'scheduled' | 'completed' | 'postponed' | 'cancelled';
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly week: CodecTypes['pg/int4@1']['input'];
+      readonly week: CodecTypes['pg/int4@1']['input'] | null;
     };
     readonly players: {
       readonly active: CodecTypes['pg/bool@1']['input'];
@@ -567,6 +641,28 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly lastName: CodecTypes['pg/text@1']['input'];
       readonly leagueId: CodecTypes['pg/int4@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    };
+    readonly playoff_series: {
+      readonly bestOf: CodecTypes['pg/int4@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly higherSeed: CodecTypes['pg/int4@1']['input'];
+      readonly higherSeedTeamId: CodecTypes['pg/int4@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly lowerSeed: CodecTypes['pg/int4@1']['input'];
+      readonly lowerSeedTeamId: CodecTypes['pg/int4@1']['input'];
+      readonly playoffId: CodecTypes['pg/int4@1']['input'];
+      readonly round: 'Quarterfinal' | 'Semifinal' | 'Final';
+      readonly seasonId: CodecTypes['pg/int4@1']['input'];
+      readonly seriesNumber: CodecTypes['pg/int4@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+    };
+    readonly playoffs: {
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly reseed: CodecTypes['pg/bool@1']['input'];
+      readonly seasonId: CodecTypes['pg/int4@1']['input'];
+      readonly teamCount: CodecTypes['pg/int4@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
     readonly roster_players: {
@@ -593,7 +689,7 @@ export type StorageColumnInputTypes = {
       readonly leagueId: CodecTypes['pg/int4@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly rules: CodecTypes['pg/text@1']['input'] | null;
-      readonly slug: CodecTypes['pg/text@1']['input'];
+      readonly slug: CodecTypes['pg/text@1']['input'] | null;
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly theme: CodecTypes['pg/text@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -644,7 +740,7 @@ export namespace Models {
     id: CodecTypes['pg/int4@1']['output'];
     leagueId: CodecTypes['pg/int4@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
-    slug: CodecTypes['pg/text@1']['output'];
+    slug: CodecTypes['pg/text@1']['output'] | null;
     rules: CodecTypes['pg/text@1']['output'] | null;
     theme: CodecTypes['pg/text@1']['output'] | null;
     startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
@@ -654,9 +750,10 @@ export namespace Models {
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     league: public_League;
     matches: public_Match[];
+    playoffSeries: public_PlayoffSeries[];
     rosters: public_RosterPlayer[];
     seasonTeams: public_SeasonTeam[];
-    readonly [RelationKeys]?: 'league' | 'matches' | 'rosters' | 'seasonTeams';
+    readonly [RelationKeys]?: 'league' | 'matches' | 'playoffSeries' | 'rosters' | 'seasonTeams';
   };
   export type public_Team = {
     id: CodecTypes['pg/int4@1']['output'];
@@ -667,13 +764,22 @@ export namespace Models {
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     venueId: CodecTypes['pg/int4@1']['output'] | null;
     awayMatches: public_Match[];
+    higherSeedSeries: public_PlayoffSeries[];
     homeMatches: public_Match[];
     league: public_League;
+    lowerSeedSeries: public_PlayoffSeries[];
     rosterSpots: public_RosterPlayer[];
     seasonTeams: public_SeasonTeam[];
     venue: public_Venue | null;
     readonly [RelationKeys]?:
-      'awayMatches' | 'homeMatches' | 'league' | 'rosterSpots' | 'seasonTeams' | 'venue';
+      | 'awayMatches'
+      | 'higherSeedSeries'
+      | 'homeMatches'
+      | 'league'
+      | 'lowerSeedSeries'
+      | 'rosterSpots'
+      | 'seasonTeams'
+      | 'venue';
   };
   export type public_Player = {
     id: CodecTypes['pg/int4@1']['output'];
@@ -714,19 +820,22 @@ export namespace Models {
   export type public_Match = {
     id: CodecTypes['pg/int4@1']['output'];
     seasonId: CodecTypes['pg/int4@1']['output'];
-    week: CodecTypes['pg/int4@1']['output'];
+    week: CodecTypes['pg/int4@1']['output'] | null;
     homeTeamId: CodecTypes['pg/int4@1']['output'];
     awayTeamId: CodecTypes['pg/int4@1']['output'];
     scheduledAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     status: 'scheduled' | 'completed' | 'postponed' | 'cancelled';
     homeScore: CodecTypes['pg/int4@1']['output'] | null;
     awayScore: CodecTypes['pg/int4@1']['output'] | null;
+    playoffSeriesId: CodecTypes['pg/int4@1']['output'] | null;
+    seriesMatch: CodecTypes['pg/int4@1']['output'] | null;
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     awayTeam: public_Team;
     homeTeam: public_Team;
+    playoffSeries: public_PlayoffSeries | null;
     season: public_Season;
-    readonly [RelationKeys]?: 'awayTeam' | 'homeTeam' | 'season';
+    readonly [RelationKeys]?: 'awayTeam' | 'homeTeam' | 'playoffSeries' | 'season';
   };
   export type public_Venue = {
     id: CodecTypes['pg/int4@1']['output'];
@@ -758,6 +867,37 @@ export namespace Models {
     user: public_User;
     readonly [RelationKeys]?: 'league' | 'user';
   };
+  export type public_PlayoffSeries = {
+    id: CodecTypes['pg/int4@1']['output'];
+    seasonId: CodecTypes['pg/int4@1']['output'];
+    round: 'Quarterfinal' | 'Semifinal' | 'Final';
+    seriesNumber: CodecTypes['pg/int4@1']['output'];
+    higherSeedTeamId: CodecTypes['pg/int4@1']['output'];
+    higherSeed: CodecTypes['pg/int4@1']['output'];
+    lowerSeedTeamId: CodecTypes['pg/int4@1']['output'];
+    lowerSeed: CodecTypes['pg/int4@1']['output'];
+    bestOf: CodecTypes['pg/int4@1']['output'];
+    playoffId: CodecTypes['pg/int4@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    higherSeedTeam: public_Team;
+    lowerSeedTeam: public_Team;
+    matches: public_Match[];
+    playoff: public_Playoff;
+    season: public_Season;
+    readonly [RelationKeys]?: 'higherSeedTeam' | 'lowerSeedTeam' | 'matches' | 'playoff' | 'season';
+  };
+  export type public_Playoff = {
+    id: CodecTypes['pg/int4@1']['output'];
+    seasonId: CodecTypes['pg/int4@1']['output'];
+    teamCount: CodecTypes['pg/int4@1']['output'];
+    reseed: CodecTypes['pg/bool@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    season: public_Season;
+    series: public_PlayoffSeries[];
+    readonly [RelationKeys]?: 'season' | 'series';
+  };
 }
 
 export declare const models: {
@@ -772,6 +912,8 @@ export declare const models: {
     Venue: Models.public_Venue;
     User: Models.public_User;
     LeagueUser: Models.public_LeagueUser;
+    PlayoffSeries: Models.public_PlayoffSeries;
+    Playoff: Models.public_Playoff;
   };
 };
 
@@ -944,7 +1086,7 @@ type ContractBase = Omit<
                 readonly week: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                 };
                 readonly homeTeamId: {
                   readonly nativeType: 'int4';
@@ -980,6 +1122,16 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: true;
                 };
+                readonly playoffSeriesId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+                readonly seriesMatch: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
                 readonly createdAt: {
                   readonly nativeType: 'timestamptz';
                   readonly codecId: 'pg/timestamptz-string@1';
@@ -1011,6 +1163,12 @@ type ContractBase = Omit<
                   readonly name: 'matches_awayTeamId_idx_17f82264';
                   readonly prefix: 'matches_awayTeamId_idx';
                   readonly columns: readonly ['awayTeamId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'matches_playoffSeriesId_idx_e438d1a0';
+                  readonly prefix: 'matches_playoffSeriesId_idx';
+                  readonly columns: readonly ['playoffSeriesId'];
                   readonly unique: false;
                 },
                 {
@@ -1054,6 +1212,18 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'teams';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'matches';
+                    readonly columns: readonly ['playoffSeriesId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'playoff_series';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -1131,6 +1301,215 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'leagues';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly playoff_series: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly seasonId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly round: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly seriesNumber: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly higherSeedTeamId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly higherSeed: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly lowerSeedTeamId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly lowerSeed: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly bestOf: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly playoffId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly createdAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                };
+                readonly updatedAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [
+                { readonly columns: readonly ['seasonId', 'round', 'seriesNumber'] },
+              ];
+              indexes: readonly [
+                {
+                  readonly name: 'playoff_series_seasonId_idx_aa50cbae';
+                  readonly prefix: 'playoff_series_seasonId_idx';
+                  readonly columns: readonly ['seasonId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'playoff_series_higherSeedTeamId_idx_c260ad05';
+                  readonly prefix: 'playoff_series_higherSeedTeamId_idx';
+                  readonly columns: readonly ['higherSeedTeamId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'playoff_series_lowerSeedTeamId_idx_1987badf';
+                  readonly prefix: 'playoff_series_lowerSeedTeamId_idx';
+                  readonly columns: readonly ['lowerSeedTeamId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'playoff_series_playoffId_idx_15ca42b5';
+                  readonly prefix: 'playoff_series_playoffId_idx';
+                  readonly columns: readonly ['playoffId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'playoff_series';
+                    readonly columns: readonly ['seasonId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'seasons';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'playoff_series';
+                    readonly columns: readonly ['higherSeedTeamId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'teams';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'playoff_series';
+                    readonly columns: readonly ['lowerSeedTeamId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'teams';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'playoff_series';
+                    readonly columns: readonly ['playoffId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'playoffs';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly playoffs: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly seasonId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly teamCount: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly reseed: {
+                  readonly nativeType: 'bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                };
+                readonly createdAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                };
+                readonly updatedAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['seasonId'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'playoffs';
+                    readonly columns: readonly ['seasonId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'seasons';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -1350,7 +1729,7 @@ type ContractBase = Omit<
                 readonly slug: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                 };
                 readonly rules: {
                   readonly nativeType: 'text';
@@ -1394,10 +1773,7 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [
-                { readonly columns: readonly ['leagueId', 'name'] },
-                { readonly columns: readonly ['leagueId', 'slug'] },
-              ];
+              uniques: readonly [{ readonly columns: readonly ['leagueId', 'name'] }];
               indexes: readonly [
                 {
                   readonly name: 'seasons_leagueId_idx_1296e985';
@@ -1614,6 +1990,10 @@ type ContractBase = Omit<
               readonly kind: 'valueSet';
               readonly values: readonly ['scheduled', 'completed', 'postponed', 'cancelled'];
             };
+            readonly PlayoffRound: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['Quarterfinal', 'Semifinal', 'Final'];
+            };
           };
         };
       };
@@ -1644,6 +2024,11 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'LeagueUser';
     };
+    readonly playoff_series: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'PlayoffSeries';
+    };
+    readonly playoffs: { readonly namespace: 'public' & NamespaceId; readonly model: 'Playoff' };
   };
   readonly domain: {
     readonly namespaces: {
@@ -1815,7 +2200,7 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly week: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly homeTeamId: {
@@ -1842,6 +2227,14 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly awayScore: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly playoffSeriesId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly seriesMatch: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
@@ -1879,6 +2272,18 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly playoffSeries: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'PlayoffSeries';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['playoffSeriesId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
               readonly season: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -1905,6 +2310,8 @@ type ContractBase = Omit<
                 readonly status: { readonly column: 'status' };
                 readonly homeScore: { readonly column: 'homeScore' };
                 readonly awayScore: { readonly column: 'awayScore' };
+                readonly playoffSeriesId: { readonly column: 'playoffSeriesId' };
+                readonly seriesMatch: { readonly column: 'seriesMatch' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
               };
@@ -1986,6 +2393,208 @@ type ContractBase = Omit<
                 readonly lastName: { readonly column: 'lastName' };
                 readonly email: { readonly column: 'email' };
                 readonly active: { readonly column: 'active' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly Playoff: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly seasonId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly teamCount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly reseed: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly season: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Season';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['seasonId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly series: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'PlayoffSeries';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['playoffId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'playoffs';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly seasonId: { readonly column: 'seasonId' };
+                readonly teamCount: { readonly column: 'teamCount' };
+                readonly reseed: { readonly column: 'reseed' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly PlayoffSeries: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly seasonId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly round: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly seriesNumber: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly higherSeedTeamId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly higherSeed: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly lowerSeedTeamId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly lowerSeed: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly bestOf: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly playoffId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly higherSeedTeam: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Team' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['higherSeedTeamId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly lowerSeedTeam: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Team' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['lowerSeedTeamId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly matches: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Match';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['playoffSeriesId'];
+                };
+              };
+              readonly playoff: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Playoff';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['playoffId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly season: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Season';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['seasonId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'playoff_series';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly seasonId: { readonly column: 'seasonId' };
+                readonly round: { readonly column: 'round' };
+                readonly seriesNumber: { readonly column: 'seriesNumber' };
+                readonly higherSeedTeamId: { readonly column: 'higherSeedTeamId' };
+                readonly higherSeed: { readonly column: 'higherSeed' };
+                readonly lowerSeedTeamId: { readonly column: 'lowerSeedTeamId' };
+                readonly lowerSeed: { readonly column: 'lowerSeed' };
+                readonly bestOf: { readonly column: 'bestOf' };
+                readonly playoffId: { readonly column: 'playoffId' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
               };
@@ -2100,7 +2709,7 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly slug: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly rules: {
@@ -2161,6 +2770,17 @@ type ContractBase = Omit<
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
                   readonly model: 'Match';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['seasonId'];
+                };
+              };
+              readonly playoffSeries: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'PlayoffSeries';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
@@ -2314,6 +2934,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['awayTeamId'];
                 };
               };
+              readonly higherSeedSeries: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'PlayoffSeries';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['higherSeedTeamId'];
+                };
+              };
               readonly homeMatches: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -2335,6 +2966,17 @@ type ContractBase = Omit<
                 readonly on: {
                   readonly localFields: readonly ['leagueId'];
                   readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly lowerSeedSeries: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'PlayoffSeries';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['lowerSeedTeamId'];
                 };
               };
               readonly rosterSpots: {
@@ -2519,6 +3161,14 @@ type ContractBase = Omit<
               { readonly name: 'Cancelled'; readonly value: 'cancelled' },
             ];
           };
+          readonly PlayoffRound: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'Quarterfinal'; readonly value: 'Quarterfinal' },
+              { readonly name: 'Semifinal'; readonly value: 'Semifinal' },
+              { readonly name: 'Final'; readonly value: 'Final' },
+            ];
+          };
         };
       };
     };
@@ -2568,6 +3218,24 @@ type ContractBase = Omit<
           readonly ref: {
             readonly namespace: 'public';
             readonly table: 'players';
+            readonly column: 'updatedAt';
+          };
+          readonly onCreate: { readonly kind: 'generator'; readonly id: 'timestampNow' };
+          readonly onUpdate: { readonly kind: 'generator'; readonly id: 'timestampNow' };
+        },
+        {
+          readonly ref: {
+            readonly namespace: 'public';
+            readonly table: 'playoff_series';
+            readonly column: 'updatedAt';
+          };
+          readonly onCreate: { readonly kind: 'generator'; readonly id: 'timestampNow' };
+          readonly onUpdate: { readonly kind: 'generator'; readonly id: 'timestampNow' };
+        },
+        {
+          readonly ref: {
+            readonly namespace: 'public';
+            readonly table: 'playoffs';
             readonly column: 'updatedAt';
           };
           readonly onCreate: { readonly kind: 'generator'; readonly id: 'timestampNow' };

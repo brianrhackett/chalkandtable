@@ -1,0 +1,534 @@
+[
+  {
+    "id": "table.playoff_series",
+    "label": "Create table \"playoff_series\"",
+    "summary": "Creates table \"playoff_series\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "playoff_series"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"playoff_series\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"playoff_series\"",
+        "sql": "CREATE TABLE \"public\".\"playoff_series\" (\n  \"bestOf\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"higherSeed\" int4 NOT NULL,\n  \"higherSeedTeamId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"lowerSeed\" int4 NOT NULL,\n  \"lowerSeedTeamId\" int4 NOT NULL,\n  \"round\" text NOT NULL,\n  \"seasonId\" int4 NOT NULL,\n  \"seriesNumber\" int4 NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"playoff_series_round_check_59ed4e16\" CHECK (\"round\" IN ('Quarterfinal', 'Semifinal', 'Final'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"playoff_series\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.matches.playoffSeriesId",
+    "label": "Add column \"playoffSeriesId\" to \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "playoffSeriesId",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"playoffSeriesId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "matches",
+          "playoffSeriesId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"playoffSeriesId\"",
+        "sql": "ALTER TABLE \"public\".\"matches\" ADD COLUMN \"playoffSeriesId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"playoffSeriesId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "matches",
+          "playoffSeriesId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.matches.seriesMatch",
+    "label": "Add column \"seriesMatch\" to \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "seriesMatch",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"seriesMatch\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "matches",
+          "seriesMatch"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"seriesMatch\"",
+        "sql": "ALTER TABLE \"public\".\"matches\" ADD COLUMN \"seriesMatch\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"seriesMatch\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "matches",
+          "seriesMatch"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.dropNotNull.matches.week",
+    "label": "Drop NOT NULL on \"matches\".\"week\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "week",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"week\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "matches",
+          "week"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop NOT NULL on \"week\"",
+        "sql": "ALTER TABLE \"public\".\"matches\" ALTER COLUMN \"week\" DROP NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"week\" is nullable",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "matches",
+          "week",
+          "YES"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.playoff_series.playoff_series_seasonId_round_seriesNumber_key",
+    "label": "Add unique constraint on \"playoff_series\" (seasonId, round, seriesNumber)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "playoff_series_seasonId_round_seriesNumber_key",
+        "table": "playoff_series"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"playoff_series_seasonId_round_seriesNumber_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_series_seasonId_round_seriesNumber_key",
+          "public",
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"playoff_series_seasonId_round_seriesNumber_key\"",
+        "sql": "ALTER TABLE \"public\".\"playoff_series\" ADD CONSTRAINT \"playoff_series_seasonId_round_seriesNumber_key\" UNIQUE (\"seasonId\", \"round\", \"seriesNumber\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"playoff_series_seasonId_round_seriesNumber_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_series_seasonId_round_seriesNumber_key",
+          "public",
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.matches.matches_playoffSeriesId_idx_e438d1a0",
+    "label": "Create index \"matches_playoffSeriesId_idx_e438d1a0\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "matches_playoffSeriesId_idx_e438d1a0",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"matches_playoffSeriesId_idx_e438d1a0\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_playoffSeriesId_idx_e438d1a0\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"matches_playoffSeriesId_idx_e438d1a0\"",
+        "sql": "CREATE INDEX \"matches_playoffSeriesId_idx_e438d1a0\" ON \"public\".\"matches\" (\"playoffSeriesId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"matches_playoffSeriesId_idx_e438d1a0\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_playoffSeriesId_idx_e438d1a0\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.playoff_series.playoff_series_higherSeedTeamId_idx_c260ad05",
+    "label": "Create index \"playoff_series_higherSeedTeamId_idx_c260ad05\" on \"playoff_series\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "playoff_series_higherSeedTeamId_idx_c260ad05",
+        "table": "playoff_series"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"playoff_series_higherSeedTeamId_idx_c260ad05\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_series_higherSeedTeamId_idx_c260ad05\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"playoff_series_higherSeedTeamId_idx_c260ad05\"",
+        "sql": "CREATE INDEX \"playoff_series_higherSeedTeamId_idx_c260ad05\" ON \"public\".\"playoff_series\" (\"higherSeedTeamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"playoff_series_higherSeedTeamId_idx_c260ad05\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_series_higherSeedTeamId_idx_c260ad05\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.playoff_series.playoff_series_lowerSeedTeamId_idx_1987badf",
+    "label": "Create index \"playoff_series_lowerSeedTeamId_idx_1987badf\" on \"playoff_series\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "playoff_series_lowerSeedTeamId_idx_1987badf",
+        "table": "playoff_series"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"playoff_series_lowerSeedTeamId_idx_1987badf\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_series_lowerSeedTeamId_idx_1987badf\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"playoff_series_lowerSeedTeamId_idx_1987badf\"",
+        "sql": "CREATE INDEX \"playoff_series_lowerSeedTeamId_idx_1987badf\" ON \"public\".\"playoff_series\" (\"lowerSeedTeamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"playoff_series_lowerSeedTeamId_idx_1987badf\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_series_lowerSeedTeamId_idx_1987badf\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.playoff_series.playoff_series_seasonId_idx_aa50cbae",
+    "label": "Create index \"playoff_series_seasonId_idx_aa50cbae\" on \"playoff_series\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "playoff_series_seasonId_idx_aa50cbae",
+        "table": "playoff_series"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"playoff_series_seasonId_idx_aa50cbae\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_series_seasonId_idx_aa50cbae\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"playoff_series_seasonId_idx_aa50cbae\"",
+        "sql": "CREATE INDEX \"playoff_series_seasonId_idx_aa50cbae\" ON \"public\".\"playoff_series\" (\"seasonId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"playoff_series_seasonId_idx_aa50cbae\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_series_seasonId_idx_aa50cbae\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.playoff_series.playoff_series_seasonId_fkey",
+    "label": "Add foreign key \"playoff_series_seasonId_fkey\" on \"playoff_series\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "playoff_series_seasonId_fkey",
+        "table": "playoff_series"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"playoff_series_seasonId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_series_seasonId_fkey",
+          "public",
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"playoff_series_seasonId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"playoff_series\"\nADD CONSTRAINT \"playoff_series_seasonId_fkey\"\nFOREIGN KEY (\"seasonId\")\nREFERENCES \"public\".\"seasons\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"playoff_series_seasonId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_series_seasonId_fkey",
+          "public",
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.playoff_series.playoff_series_higherSeedTeamId_fkey",
+    "label": "Add foreign key \"playoff_series_higherSeedTeamId_fkey\" on \"playoff_series\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "playoff_series_higherSeedTeamId_fkey",
+        "table": "playoff_series"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"playoff_series_higherSeedTeamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_series_higherSeedTeamId_fkey",
+          "public",
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"playoff_series_higherSeedTeamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"playoff_series\"\nADD CONSTRAINT \"playoff_series_higherSeedTeamId_fkey\"\nFOREIGN KEY (\"higherSeedTeamId\")\nREFERENCES \"public\".\"teams\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"playoff_series_higherSeedTeamId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_series_higherSeedTeamId_fkey",
+          "public",
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.playoff_series.playoff_series_lowerSeedTeamId_fkey",
+    "label": "Add foreign key \"playoff_series_lowerSeedTeamId_fkey\" on \"playoff_series\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "playoff_series_lowerSeedTeamId_fkey",
+        "table": "playoff_series"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"playoff_series_lowerSeedTeamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_series_lowerSeedTeamId_fkey",
+          "public",
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"playoff_series_lowerSeedTeamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"playoff_series\"\nADD CONSTRAINT \"playoff_series_lowerSeedTeamId_fkey\"\nFOREIGN KEY (\"lowerSeedTeamId\")\nREFERENCES \"public\".\"teams\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"playoff_series_lowerSeedTeamId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_series_lowerSeedTeamId_fkey",
+          "public",
+          "\"public\".\"playoff_series\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.matches.matches_playoffSeriesId_fkey",
+    "label": "Add foreign key \"matches_playoffSeriesId_fkey\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "matches_playoffSeriesId_fkey",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"matches_playoffSeriesId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_playoffSeriesId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"matches_playoffSeriesId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"matches\"\nADD CONSTRAINT \"matches_playoffSeriesId_fkey\"\nFOREIGN KEY (\"playoffSeriesId\")\nREFERENCES \"public\".\"playoff_series\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"matches_playoffSeriesId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_playoffSeriesId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ]
+      }
+    ]
+  }
+]
