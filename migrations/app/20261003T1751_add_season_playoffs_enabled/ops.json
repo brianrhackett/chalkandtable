@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.seasons.playoffsEnabled",
+    "label": "Add column \"playoffsEnabled\" to \"seasons\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "playoffsEnabled",
+        "table": "seasons"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"playoffsEnabled\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "seasons",
+          "playoffsEnabled"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"playoffsEnabled\"",
+        "sql": "ALTER TABLE \"public\".\"seasons\" ADD COLUMN \"playoffsEnabled\" bool"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"playoffsEnabled\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "seasons",
+          "playoffsEnabled"
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,164 @@
+[
+  {
+    "id": "table.playoff_round_configs",
+    "label": "Create table \"playoff_round_configs\"",
+    "summary": "Creates table \"playoff_round_configs\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "playoff_round_configs"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"playoff_round_configs\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_round_configs\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"playoff_round_configs\"",
+        "sql": "CREATE TABLE \"public\".\"playoff_round_configs\" (\n  \"bestOf\" int4 NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"playoffId\" int4 NOT NULL,\n  \"round\" int4 NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"playoff_round_configs\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_round_configs\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.playoff_round_configs.playoff_round_configs_playoffId_round_key",
+    "label": "Add unique constraint on \"playoff_round_configs\" (playoffId, round)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "playoff_round_configs_playoffId_round_key",
+        "table": "playoff_round_configs"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"playoff_round_configs_playoffId_round_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_round_configs_playoffId_round_key",
+          "public",
+          "\"public\".\"playoff_round_configs\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"playoff_round_configs_playoffId_round_key\"",
+        "sql": "ALTER TABLE \"public\".\"playoff_round_configs\" ADD CONSTRAINT \"playoff_round_configs_playoffId_round_key\" UNIQUE (\"playoffId\", \"round\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"playoff_round_configs_playoffId_round_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_round_configs_playoffId_round_key",
+          "public",
+          "\"public\".\"playoff_round_configs\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.playoff_round_configs.playoff_round_configs_playoffId_idx_15ca42b5",
+    "label": "Create index \"playoff_round_configs_playoffId_idx_15ca42b5\" on \"playoff_round_configs\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "playoff_round_configs_playoffId_idx_15ca42b5",
+        "table": "playoff_round_configs"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"playoff_round_configs_playoffId_idx_15ca42b5\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_round_configs_playoffId_idx_15ca42b5\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"playoff_round_configs_playoffId_idx_15ca42b5\"",
+        "sql": "CREATE INDEX \"playoff_round_configs_playoffId_idx_15ca42b5\" ON \"public\".\"playoff_round_configs\" (\"playoffId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"playoff_round_configs_playoffId_idx_15ca42b5\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"playoff_round_configs_playoffId_idx_15ca42b5\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.playoff_round_configs.playoff_round_configs_playoffId_fkey",
+    "label": "Add foreign key \"playoff_round_configs_playoffId_fkey\" on \"playoff_round_configs\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "playoff_round_configs_playoffId_fkey",
+        "table": "playoff_round_configs"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"playoff_round_configs_playoffId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_round_configs_playoffId_fkey",
+          "public",
+          "\"public\".\"playoff_round_configs\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"playoff_round_configs_playoffId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"playoff_round_configs\"\nADD CONSTRAINT \"playoff_round_configs_playoffId_fkey\"\nFOREIGN KEY (\"playoffId\")\nREFERENCES \"public\".\"playoffs\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"playoff_round_configs_playoffId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "playoff_round_configs_playoffId_fkey",
+          "public",
+          "\"public\".\"playoff_round_configs\""
+        ]
+      }
+    ]
+  }
+]

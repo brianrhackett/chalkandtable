@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 
 import { formatMatchDate } from "@/src/lib/formatMatchDate.ts";
 
-import { getLeagueTeam } from "@/src/lib/leagues/getLeagueTeam";
+import { getLeagueTeam } from "@/src/lib/leagues/teams/getLeagueTeam";
+import { getPlayerStats } from "@/src/lib/leagues/teams/getPlayerStats"
 import SeasonSelect from "@/app/components/SeasonSelect";
 
 
@@ -42,15 +43,40 @@ export default async function TeamPage({
 	const {
 		league,
 		team,
+		seasonTeam,
 		venue,
 		season,
 		seasons,
-		players,
+		rosterPlayers,
 		record,
 		upcomingMatches,
 		recentMatches,
 	} = data;
 
+	const playerStats = await getPlayerStats(
+		season.id,
+		team.id
+	);
+
+	const playerStatsById = new Map(
+		playerStats.map((player) => [
+			player.rosterPlayerId,
+			player,
+		])
+	);
+
+	const players = seasonTeam.playerStatsEnabled
+		? playerStats.map((stats) => ({
+			...rosterPlayers.find(
+				(player) => player.id === stats.rosterPlayerId
+			)!,
+			stats,
+		}))
+		: rosterPlayers.map((player) => ({
+			...player,
+			stats: null,
+		}));
+	console.log("players: ");console.log( players );
 	return (
 		<main className="mx-auto w-full max-w-7xl px-6 py-12">
 			<Link
@@ -253,20 +279,45 @@ export default async function TeamPage({
 								Roster
 							</h2>
 							<div className="mt-4 overflow-hidden rounded-md border border-[var(--surface-alt)] bg-[var(--surface)]">
-								{players.length ? (
-									players.map((player) => (
-										<div
-											key={player.id}
-											className="flex items-center justify-between gap-6 border-b border-[var(--surface-alt)] px-5 py-4 last:border-b-0"
-										>
-											{player.firstName} {player.lastName}
-										</div>
-									))
-								) : (
-									<p className="px-5 py-6 text-sm text-[var(--text-muted)]">
-										No players listed.
-									</p>
-								)}
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="border-b border-border text-left">
+											<th className="px-4 py-3 font-semibold">Player</th>
+
+											{seasonTeam.playerStatsEnabled && (
+												<>
+													<th className="px-3 py-3 text-center font-semibold">W</th>
+													<th className="px-3 py-3 text-center font-semibold">L</th>
+													<th className="px-4 py-3 text-right font-semibold">Win %</th>
+												</>
+											)}
+										</tr>
+									</thead>
+
+									<tbody className="divide-y divide-[var(--surface-alt)]">
+										{players.map((player) => (
+								
+											<tr key={player.id}>
+												<td className="px-4 py-3">
+													{player.player.firstName} {player.player.lastName}
+												</td>
+
+												{seasonTeam.playerStatsEnabled && player.stats && (
+													<>
+														<td className="px-3 py-3 text-center tabular-nums">{player.stats.wins}</td>
+														<td className="px-3 py-3 text-center tabular-nums">{player.stats.losses}</td>
+														<td className="px-4 py-3 text-right tabular-nums">
+															{(
+																player.stats.wins /
+																(player.stats.wins + player.stats.losses)
+															).toFixed(3)}
+														</td>
+													</>
+												)}
+											</tr>
+										))}	
+									</tbody>
+								</table>
 							</div>
 						</section>
 					</div>

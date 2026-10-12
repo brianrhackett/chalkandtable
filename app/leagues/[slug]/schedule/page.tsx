@@ -5,6 +5,8 @@ import { formatMatchDate } from "@/src/lib/formatMatchDate.ts";
 import { getLeagueSchedule } from "@/src/lib/leagues/getLeagueSchedule";
 
 import SeasonSelect from "@/app/components/SeasonSelect";
+import ScoreModal from "@/app/components/ScoreModal";
+import { ListOrdered, Info } from "lucide-react";
 
 type SchedulePageProps = {
 	params: Promise<{
@@ -167,12 +169,29 @@ export default async function SchedulePage({
 										key={match.id}
 										className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5"
 									>
-										<Link
-											href={teamUrl(match.awayTeam.slug)}
-											className="text-right font-[family-name:var(--font-serif)] text-lg font-semibold hover:text-[var(--accent)]"
-										>
-											{match.awayTeam.name}
-										</Link>
+										<div className="flex items-center gap-5 justify-end">
+											{(
+												match.awayTeam.playerStatsEnabled &&
+												match.status !== 'completed'
+												) && (
+												<Link
+													href={`/leagues/${league.slug}/matches/${match.id}/lineup/${match.awayTeam.id}`}
+													className="text-xs font-sans font-semibold text-[var(--accent)] hover:text-[var(--accent-strong)]"
+													title="Lineup"
+												>
+													Lineup <ListOrdered
+														className="size-4 inline"
+													/>
+												</Link>
+											)}
+
+											<Link
+												href={teamUrl(match.awayTeam.slug)}
+												className="text-right font-[family-name:var(--font-serif)] text-lg font-semibold hover:text-[var(--accent)]"
+											>
+												{match.awayTeam.name}
+											</Link>
+										</div>
 
 										<div className="min-w-16 text-center">
 											{match.status === "completed" ? (
@@ -186,14 +205,56 @@ export default async function SchedulePage({
 													@
 												</p>
 											)}
+
 										</div>
 
-										<Link
-											href={teamUrl(match.homeTeam.slug)}
-											className="font-[family-name:var(--font-serif)] text-lg font-semibold hover:text-[var(--accent)]"
+										<div className="flex items-center gap-2">
+											<Link
+												href={teamUrl(match.homeTeam.slug)}
+												className="font-[family-name:var(--font-serif)] text-lg font-semibold hover:text-[var(--accent)]"
+											>
+												{match.homeTeam.name}
+											</Link>
+
+											{(
+												match.homeTeam.playerStatsEnabled &&
+												match.status !== 'completed'
+												) && (
+												<Link
+													href={`/leagues/${league.slug}/matches/${match.id}/lineup/${match.homeTeam.id}`}
+													className="text-xs font-sans font-semibold text-[var(--accent)] hover:text-[var(--accent-strong)]"
+													title="Lineup"
+												>
+													<ListOrdered
+														className="inline size-4"
+													/> Lineup
+												</Link>
+											)}
+										</div>
+										
+										<div
+											className="text-center flex items-baseline justify-center col-span-3 gap-5"
 										>
-											{match.homeTeam.name}
-										</Link>
+											{ (match.awayTeam.playerStatsEnabled 
+												|| match.homeTeam.playerStatsEnabled) 
+												&& (
+												<Link
+													href={`/leagues/${league.slug}/matches/${match.id}`}
+													className="inline gap-1 items-center text-sm font-sans font-semibold text-[var(--accent)] hover:text-[var(--accent-strong)]"
+												>
+													<Info
+														className="inline size-4"
+													/> Details
+												</Link>
+											)}
+											<ScoreModal
+												matchId={match.id}
+												awayTeam={match.awayTeam}
+												homeTeam={match.homeTeam}
+												awayScore={match.awayScore}
+												homeScore={match.homeScore}
+											/>
+										</div>
 									</div>
 								))}
 							</div>

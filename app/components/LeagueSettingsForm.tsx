@@ -6,6 +6,7 @@ import RulesModal from "@/app/components/RulesModal";
 import TeamsEditor from "@/app/components/TeamsEditor";
 import VenuesEditor from "@/app/components/VenuesEditor";
 import ScheduleEditor from "@/app/components/ScheduleEditor";
+import PlayoffsEditor from "@/app/components/PlayoffsEditor";
 
 import type { ThemeKey } from "@/src/lib/themes";
 
@@ -13,6 +14,12 @@ import {
 	updateLeagueSettings,
 	type LeagueSettingsState,
 } from "@/app/leagues/[slug]/settings/actions";
+
+type PlayoffConfiguration = {
+    id: number;
+    teamCount: number;
+    reseed: boolean;
+};
 
 type LeagueSettingsFormProps = {
 	league: {
@@ -36,7 +43,9 @@ type LeagueSettingsFormProps = {
             id: number;
             name: string;
             venueId: number;
-        }[]
+        }[],
+        playoffs: PlayoffConfiguration | null;
+        playoffsEnabled: boolean | null;
 	};
 };
 
@@ -165,6 +174,33 @@ export default function LeagueSettingsForm({
                         </div>
 
                     </div>
+                </section>
+
+                {/* Playoff settings */}
+                <section className="mt-8 rounded-lg border border-[var(--surface-alt)] bg-[var(--surface)] p-6">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 className="font-[family-name:var(--font-serif)] text-2xl">
+                                Playoff Configuration
+                            </h2>
+
+                            <p className="mt-1 text-sm text-[var(--text-muted)]">
+                                Configure your playoff settings for the {season.name} season.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="mt-4 grid grid-cols-1 gap-5">
+                        <div className="p-4 rounded-lg border border-[var(--surface-alt)] bg-[var(--background)]">
+                            <PlayoffsEditor
+                                leagueId={league.id}
+                                seasonId={season.id}
+                                teamCount={season.teams.length}
+                                playoff={season.playoff}
+                                playoffsEnabled={season.playoffsEnabled}
+                            />
+                        </div>
+                    </div>
+                    
                 </section>
 
                 {/* League Rules */}

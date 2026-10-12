@@ -238,7 +238,7 @@ export default function ScheduleEditor({
                         Schedule
                     </h3>
 
-                    <p className="mt-1 text-sm opacity-70">
+                    <p className="mt-1 text-sm text-[var(--text-muted)]">
                         The schedule for this season has already been generated.
                     </p>
                 </div>
@@ -248,7 +248,7 @@ export default function ScheduleEditor({
                         Schedule ready
                     </p>
 
-                    <p className="mt-1 text-sm opacity-70">
+                    <p className="mt-1 text-sm text-[var(--text-muted)]">
                         Matches have been scheduled for this season.
                     </p>
                 </div>

@@ -67,7 +67,7 @@ export function rankStandings(
 	matches: CompletedMatch[]
 ): LeagueStanding[] {
 	const recordGroups = new Map<string, LeagueStanding[]>();
-
+	
 	for (const standing of standings) {
 		const key = `${standing.wins}-${standing.losses}`;
 
@@ -93,8 +93,14 @@ export function rankStandings(
 	const ranked: LeagueStanding[] = [];
 
 	for (const group of groups) {
+		
+		const rank = ranked.length + 1;
+
 		if (group.length === 1) {
-			ranked.push(group[0]);
+			ranked.push({
+				...group[0],
+				rank
+			});
 			continue;
 		}
 
@@ -126,11 +132,46 @@ export function rankStandings(
 				return miniTableDifference;
 			}
 
-			return b.racksWon - a.racksWon;
+			if (a.racksWon !== b.racksWon) {
+				return b.racksWon - a.racksWon;
+			}
+
+			return a.name.localeCompare(b.name);
 		});
 
-		ranked.push(...group);
+		for (const standing of group) {
+			const previous = ranked.at(-1);
+
+			let rank = ranked.length + 1;
+
+			if (previous) {
+				const standingMini = miniTableByTeam.get(
+					standing.teamId
+				);
+
+				const previousMini = miniTableByTeam.get(
+					previous.teamId
+				);
+
+				const isTied =
+					standing.wins === previous.wins &&
+					standing.losses === previous.losses &&
+					(standingMini?.wins ?? 0) ===
+						(previousMini?.wins ?? 0) &&
+					standing.racksWon === previous.racksWon;
+
+				if (isTied) {
+					rank = previous.rank;
+				}
+			}
+
+			ranked.push({
+				...standing,
+				rank,
+			});
+		}
 	}
 
+	console.log(ranked)
 	return ranked;
 }

@@ -178,7 +178,7 @@ export async function updateSeasonRules(
 	});
 
 	await db.orm.public.Season.update({
-		id: season.id,
+		id: seasonId,
 		rules: sanitizedRules,
 	});
 
@@ -806,4 +806,233 @@ export async function saveSchedule(
 	return {
 		success: true,
 	};
+}
+
+
+
+type PlayoffConfigurationInput = {
+    teamCount: number;
+    reseed: boolean;
+    rounds: {
+        round: number;
+        name: string;
+        bestOf: number;
+    }[];
+};
+
+export async function savePlayoffConfiguration(
+    leagueId: number,
+    seasonId: number,
+    configuration: PlayoffConfigurationInput
+) {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+        return {
+            success: false,
+            error: "You must be signed in.",
+        };
+    }
+
+    const user = await db.orm.public.User.first({
+        email: session.user.email,
+    });
+
+    if (!user) {
+        return {
+            success: false,
+            error: "User not found.",
+        };
+    }
+
+    const season = await db.orm.public.Season.first({
+        id: seasonId,
+        leagueId,
+    });
+
+    if (!season) {
+        return {
+            success: false,
+            error: "Season not found.",
+        };
+    }
+
+    const memberships = await db.orm.public.LeagueUser
+        .where({
+            userId: user.id,
+            leagueId,
+        })
+        .all();
+
+    const membership = memberships[0];
+
+    if (
+        !membership ||
+        !canManageLeague(membership.role)
+    ) {
+        return {
+            success: false,
+            error: "You do not have permission to configure playoffs.",
+        };
+    }
+
+    if (
+        configuration.teamCount < 2 ||
+        configuration.rounds.length === 0
+    ) {
+        return {
+            success: false,
+            error: "Invalid playoff configuration.",
+        };
+    }
+
+    if (
+        configuration.rounds.some(
+            (round) =>
+                round.bestOf < 1 ||
+                round.bestOf % 2 === 0
+        )
+    ) {
+        return {
+            success: false,
+            error: "Each playoff round must use an odd number of matches.",
+        };
+    }
+
+    const existingPlayoff = await db.orm.public.Playoff.first({
+		seasonId,
+	});
+
+	let playoff;
+
+	if (existingPlayoff) {
+		playoff = await db.orm.public.Playoff.update({
+			id: existingPlayoff.id,
+			teamCount: configuration.teamCount,
+			reseed: configuration.reseed,
+		});
+
+		const existingRounds =
+			await db.orm.public.PlayoffRoundConfig
+				.where({
+					playoffId: playoff.id,
+				})
+				.all();
+
+		for (const round of existingRounds) {
+			await db.orm.public.PlayoffRoundConfig.delete({
+				id: round.id,
+			});
+		}
+	} else {
+		playoff = await db.orm.public.Playoff.create({
+			seasonId,
+			teamCount: configuration.teamCount,
+			reseed: configuration.reseed,
+		});
+	}
+
+    for (const round of configuration.rounds) {
+        await db.orm.public.PlayoffRoundConfig.create({
+            playoffId: playoff.id,
+            round: round.round,
+            name: round.name,
+            bestOf: round.bestOf,
+        });
+    }
+
+	await db.orm.public.Season.update({
+		id: seasonId,
+		playoffsEnabled: true,
+	});
+
+    const league = await db.orm.public.League.first({
+        id: leagueId,
+    });
+
+    if (league) {
+        revalidatePath(
+            `/leagues/${league.slug}/settings`
+        );
+    }
+
+    return {
+        success: true,
+    };
+}
+
+export async function disableSeasonPlayoffs(
+    leagueId: number,
+    seasonId: number
+) {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+        return {
+            success: false,
+            error: "You must be signed in.",
+        };
+    }
+
+    const user = await db.orm.public.User.first({
+        email: session.user.email,
+    });
+
+    if (!user) {
+        return {
+            success: false,
+            error: "User not found.",
+        };
+    }
+
+    const season = await db.orm.public.Season.first({
+        id: seasonId,
+        leagueId,
+    });
+
+    if (!season) {
+        return {
+            success: false,
+            error: "Season not found.",
+        };
+    }
+
+    const memberships = await db.orm.public.LeagueUser
+        .where({
+            userId: user.id,
+            leagueId,
+        })
+        .all();
+
+    const membership = memberships[0];
+
+    if (
+        !membership ||
+        !canManageLeague(membership.role)
+    ) {
+        return {
+            success: false,
+            error: "You do not have permission to configure playoffs.",
+        };
+    }
+
+	const existingPlayoff =
+		await db.orm.public.Playoff.first({
+			seasonId,
+		});
+
+	if (existingPlayoff) {
+		await db.orm.public.Playoff.delete({
+			id: existingPlayoff.id,
+		});
+	}
+
+	await db.orm.public.Season.update({
+		id: seasonId,
+		playoffsEnabled: false,
+	});
+
+    return {
+        success: true,
+    };
 }

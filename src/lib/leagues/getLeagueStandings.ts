@@ -12,6 +12,7 @@ export type LeagueStanding = {
 	racksWon: number;
 	racksLost: number;
 	rackPercentage: number;
+	rank: number;
 };
 
 export async function getLeagueStandings(
@@ -41,6 +42,10 @@ export async function getLeagueStandings(
 		};
 	}
 
+	const playoffs = await db.orm.public.Playoff.first({
+		seasonId: season.id
+	});
+
 	const seasons = await db.orm.public.Season
 		.where({
 			leagueId: league.id,
@@ -64,6 +69,7 @@ export async function getLeagueStandings(
 			seasonId: season.id,
 			status: "completed",
 		})
+		.where((match) => match.week.isNotNull())
 		.all();
 
 	const activeTeamIds = new Set(
@@ -133,6 +139,7 @@ export async function getLeagueStandings(
 			};
 		});
 
+	
     const rankedStandings = rankStandings(
 	    standings,
 	    matches
@@ -143,5 +150,6 @@ export async function getLeagueStandings(
 		season,
 		seasons,
 		standings: rankedStandings,
-	};
+		playoffTeamCount: playoffs?.teamCount ?? null
+ 	};
 }

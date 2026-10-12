@@ -6,11 +6,13 @@ export type ScheduleMatch = {
 		id: number;
 		name: string;
 		slug: string;
+		playerStatsEnabled: boolean;
 	};
 	awayTeam: {
 		id: number;
 		name: string;
 		slug: string;
+		playerStatsEnabled: boolean;
 	};
 	scheduledAt: string;
 	status: string;
@@ -90,9 +92,19 @@ export async function getLeagueSchedule(
 		seasonTeams.map((seasonTeam) => seasonTeam.teamId)
 	);
 
-	const activeTeams = teams.filter(
-		(team) => activeTeamIds.has(team.id)
+	const seasonTeamsByTeamId = new Map(
+		seasonTeams.map((seasonTeam) => [
+			seasonTeam.teamId,
+			seasonTeam,
+		])
 	);
+
+	const activeTeams = teams
+		.filter((team) => activeTeamIds.has(team.id))
+		.map((team) => ({
+			...team,
+			playerStatsEnabled: seasonTeamsByTeamId.get(team.id)!.playerStatsEnabled,
+		}));
 
 	const teamsById = new Map(
 		activeTeams.map((team) => [
@@ -147,11 +159,13 @@ export async function getLeagueSchedule(
 					id: homeTeam.id,
 					name: homeTeam.name,
 					slug: homeTeam.slug,
+					playerStatsEnabled: homeTeam.playerStatsEnabled,
 				},
 				awayTeam: {
 					id: awayTeam.id,
 					name: awayTeam.name,
 					slug: awayTeam.slug,
+					playerStatsEnabled: awayTeam.playerStatsEnabled,
 				},
 				scheduledAt: match.scheduledAt,
 				status: match.status,
@@ -181,7 +195,7 @@ export async function getLeagueSchedule(
 				: null,
 		});
 	}
-
+	
 	weeks.sort((a, b) => a.week - b.week);
 
     let filteredWeeks = weeks;

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getLeagueStandings } from "@/src/lib/leagues/getLeagueStandings";
-
+import { getSeasonPlayoffs } from "@/src/lib/leagues/getSeasonPlayoffs";
 import SeasonSelect from "@/app/components/SeasonSelect";
+import PlayoffBracket from "@/app/components/PlayoffBracket";
 
 type StandingsPageProps = {
 	params: Promise<{
@@ -32,7 +33,10 @@ export default async function StandingsPage({
 		season,
 		seasons,
 		standings,
+		playoffTeamCount,
 	} = data;
+
+	const playoffs = await getSeasonPlayoffs(season.id);
 
 	if (!season) {
 		return (
@@ -66,11 +70,28 @@ export default async function StandingsPage({
 				</div>
 				<div>
 					<SeasonSelect 
-						seasons={seasons}
-					    selectedSeason={season}
+						seasons={seasons.map((season) => ({
+							id: season.id,
+							name: season.name,
+							slug: season.slug,
+							active: season.active,
+						}))}
+						selectedSeason={{
+							id: season.id,
+							name: season.name,
+							slug: season.slug,
+							active: season.active,
+						}}
 					/>
 				</div>
 			</div>
+
+			{playoffs.started && (
+				<PlayoffBracket 
+					playoffs={playoffs}
+			        leagueSlug={league.slug}
+				/>
+			)}
 
 			<div className="mt-10 overflow-hidden rounded-md border border-[var(--surface-alt)] bg-[var(--surface)]">
 				<div className="overflow-x-auto">
@@ -119,10 +140,17 @@ export default async function StandingsPage({
 							{standings.map((team, index) => (
 								<tr
 									key={team.teamId}
-									className="transition-colors hover:bg-[var(--surface-alt)]"
+									className={`
+										transition-colors hover:bg-[var(--surface-alt)]
+										${
+											playoffTeamCount !== null && index === playoffTeamCount - 1
+												? "border-b-2 border-[var(--accent)]"
+												: ""
+										}
+									`}
 								>
 									<td className="px-5 py-5 text-center font-[family-name:var(--font-mono)] text-sm text-[var(--text-muted)]">
-										{index + 1}
+										{team.rank}
 									</td>
 
 									<td className="sticky left-0 z-10 min-w-40 bg-[var(--surface)] px-5 py-5 sm:static sm:bg-transparent">

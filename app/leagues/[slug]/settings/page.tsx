@@ -64,6 +64,33 @@ export default async function SettingsPage({
         ).length,
     }));
 
+    const playoff = await db.orm.public.Playoff.first({
+        seasonId: activeSeason.id,
+    });
+
+    const playoffRounds = playoff
+        ? await db.orm.public.PlayoffRoundConfig
+            .where({
+                playoffId: playoff.id,
+            })
+            .all()
+        : [];
+
+    const playoffConfig = playoff
+                            ? {
+                                id: playoff.id,
+                                teamCount: playoff.teamCount,
+                                reseed: playoff.reseed,
+                                rounds: playoffRounds
+                                            .sort((a, b) => a.round - b.round)
+                                            .map((round) => ({
+                                                round: round.round,
+                                                name: round.name,
+                                                bestOf: round.bestOf,
+                                            })),
+                            }
+                            : null;
+
     return (
         <>
             
@@ -90,7 +117,9 @@ export default async function SettingsPage({
                         name: activeSeason.name,
                         rules: activeSeason.rules,
                         hasSchedule: activeSeason.matches.length > 0,
-                        teams: activeSeason.seasonTeams.map((seasonTeam) => seasonTeam.team)
+                        teams: activeSeason.seasonTeams.map((seasonTeam) => seasonTeam.team),
+                        playoff: playoffConfig,
+                        playoffsEnabled: activeSeason.playoffsEnabled,
                     }}
                 />
                 

@@ -16,24 +16,31 @@ model League {
   @@map("leagues")
 }
 
-model Season {
-  id          	Int                        	@id @default(autoincrement())
-  leagueId    	Int
-  name        	String
-  slug		  	String?
-  rules       	String?
-  theme       	String?
-  startDate   	DateTime?
-  endDate     	DateTime?
-  active      	Boolean                    	@default(false)
-  createdAt   	TimestamptzString          	@default(now())
-  updatedAt   	temporal.updatedAtString()
+enum MatchFormat {
+  Singles
+  Doubles
+}
 
-  league      	League                     	@relation(fields:[leagueId], references:[id], onDelete: Cascade)
-  seasonTeams 	SeasonTeam[]
-  rosters     	RosterPlayer[]
-  matches     	Match[]
-  playoffSeries PlayoffSeries[]
+model Season {
+  id              Int                        @id @default(autoincrement())
+  leagueId        Int
+  name            String
+  slug            String?
+  rules           String?
+  theme           String?
+  startDate       DateTime?
+  endDate         DateTime?
+  active          Boolean                    @default(false)
+  createdAt       TimestamptzString          @default(now())
+  updatedAt       temporal.updatedAtString()
+  playoffsEnabled Boolean?
+  matchFormat     MatchFormat                @default(Doubles)
+
+  league          League                     @relation(fields:[leagueId], references:[id], onDelete: Cascade)
+  seasonTeams     SeasonTeam[]
+  rosters         RosterPlayer[]
+  matches         Match[]
+  playoffSeries   PlayoffSeries[]
 
   @@unique([leagueId, name])
   //@@unique([leagueId, slug])
@@ -41,24 +48,28 @@ model Season {
 }
 
 model Team {
-  id          		Int                        	@id @default(autoincrement())
-  leagueId    		Int
-  name       	 	String
-  slug        		String
-  createdAt   		TimestamptzString          	@default(now())
-  updatedAt   		temporal.updatedAtString()
-  venueId     		Int?
+  id               Int                        @id @default(autoincrement())
+  leagueId         Int
+  name             String
+  slug             String
+  createdAt        TimestamptzString          @default(now())
+  updatedAt        temporal.updatedAtString()
+  venueId          Int?
 
-  league      		League                    	@relation(fields:[leagueId], references:[id], onDelete: Cascade)
-  seasonTeams 		SeasonTeam[]
-  rosterSpots 		RosterPlayer[]
-  venue       		Venue?                     	@relation(fields:[venueId], references:[id])
+  league           League                     @relation(fields:[leagueId], references:[id], onDelete: Cascade)
+  seasonTeams      SeasonTeam[]
+  rosterSpots      RosterPlayer[]
+  venue            Venue?                     @relation(fields:[venueId], references:[id])
 
-  homeMatches 		Match[]                    	@relation("HomeTeam")
-  awayMatches 		Match[]                    	@relation("AwayTeam")
+  homeMatches      Match[]                    @relation("HomeTeam")
+  awayMatches      Match[]                    @relation("AwayTeam")
 
-  higherSeedSeries 	PlayoffSeries[] 			@relation("HigherSeedTeam")
-  lowerSeedSeries  	PlayoffSeries[] 			@relation("LowerSeedTeam")
+  leagueUsers      LeagueUser[]
+  matchLineups     MatchLineup[]
+  wonRacks         Rack[]
+
+  higherSeedSeries PlayoffSeries[]            @relation("HigherSeedTeam")
+  lowerSeedSeries  PlayoffSeries[]            @relation("LowerSeedTeam")
 
   @@unique([leagueId, slug])
   @@map("teams")
@@ -70,6 +81,7 @@ model Player {
   firstName   String
   lastName    String
   email       String?
+  phone       String?
   active      Boolean                    @default(true)
   createdAt   TimestamptzString          @default(now())
   updatedAt   temporal.updatedAtString()
@@ -82,31 +94,34 @@ model Player {
 }
 
 model SeasonTeam {
-  id        Int               @id @default(autoincrement())
-  seasonId  Int
-  teamId    Int
-  createdAt TimestamptzString @default(now())
+  id                 Int               @id @default(autoincrement())
+  seasonId           Int
+  teamId             Int
+  createdAt          TimestamptzString @default(now())
+  playerStatsEnabled Boolean           @default(true)
 
-  season    Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
-  team      Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
+  season             Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  team               Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
 
   @@unique([seasonId, teamId])
   @@map("season_teams")
 }
 
 model RosterPlayer {
-  id        Int               @id @default(autoincrement())
-  seasonId  Int
-  teamId    Int
-  playerId  Int
-  active    Boolean           @default(true)
-  joinedAt  DateTime?
-  leftAt    DateTime?
-  createdAt TimestamptzString @default(now())
+  id           Int               @id @default(autoincrement())
+  seasonId     Int
+  teamId       Int
+  playerId     Int
+  active       Boolean           @default(true)
+  joinedAt     DateTime?
+  leftAt       DateTime?
+  createdAt    TimestamptzString @default(now())
 
-  season    Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
-  team      Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
-  player    Player            @relation(fields:[playerId], references:[id], onDelete: Cascade)
+  season       Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  team         Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
+  player       Player            @relation(fields:[playerId], references:[id], onDelete: Cascade)
+
+  matchLineups MatchLineup[]
 
   @@unique([seasonId, playerId])
   @@index([seasonId, teamId])
@@ -114,28 +129,31 @@ model RosterPlayer {
 }
 
 model Match {
-  id          		Int                        	@id @default(autoincrement())
-  seasonId    		Int
-  week        		Int?
-  homeTeamId  		Int
-  awayTeamId  		Int
-  scheduledAt 		DateTime
-  status      		MatchStatus                	@default(Scheduled)
+  id              Int                        @id @default(autoincrement())
+  seasonId        Int
+  week            Int?
+  homeTeamId      Int
+  awayTeamId      Int
+  scheduledAt     DateTime
+  status          MatchStatus                @default(Scheduled)
 
-  homeScore   		Int?
-  awayScore   		Int?
+  homeScore       Int?
+  awayScore       Int?
 
-  playoffSeriesId 	Int?
-  seriesMatch		Int?
+  playoffSeriesId Int?
+  seriesMatch     Int?
 
-  createdAt   		TimestamptzString          	@default(now())
-  updatedAt   		temporal.updatedAtString()
+  createdAt       TimestamptzString          @default(now())
+  updatedAt       temporal.updatedAtString()
 
-  season      		Season                     	@relation(fields:[seasonId], references:[id], onDelete: Cascade)
-  homeTeam    		Team                       	@relation("HomeTeam", fields:[homeTeamId], references:[id])
-  awayTeam    		Team                       	@relation("AwayTeam", fields:[awayTeamId], references:[id])
+  season          Season                     @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  homeTeam        Team                       @relation("HomeTeam", fields:[homeTeamId], references:[id])
+  awayTeam        Team                       @relation("AwayTeam", fields:[awayTeamId], references:[id])
 
-  playoffSeries 	PlayoffSeries? 				@relation(fields: [playoffSeriesId], references: [id],	onDelete: Cascade)
+  lineups         MatchLineup[]
+  racks           Rack[]
+
+  playoffSeries   PlayoffSeries?             @relation(fields:[playoffSeriesId], references:[id], onDelete: Cascade)
 
   @@index([seasonId, week])
   @@index([homeTeamId])
@@ -185,47 +203,49 @@ model LeagueUser {
   userId    Int
   leagueId  Int
   role      String
+  teamId    Int?
   createdAt TimestamptzString @default(now())
 
   user      User              @relation(fields:[userId], references:[id], onDelete: Cascade)
   league    League            @relation(fields:[leagueId], references:[id], onDelete: Cascade)
+  team      Team?             @relation(fields:[teamId], references:[id], onDelete: SetNull)
 
   @@unique([userId, leagueId])
   @@map("league_users")
 }
 
 enum PlayoffRound {
-    Quarterfinal
-    Semifinal
-    Final
+  Quarterfinal
+  Semifinal
+  Final
 }
 
 model PlayoffSeries {
-  id                  Int                         @id @default(autoincrement())
-  seasonId            Int
-  round               PlayoffRound
-  seriesNumber        Int
+  id               Int                        @id @default(autoincrement())
+  seasonId         Int
+  round            PlayoffRound
+  seriesNumber     Int
 
-  higherSeedTeamId    Int
-  higherSeed          Int
+  higherSeedTeamId Int
+  higherSeed       Int
 
-  lowerSeedTeamId     Int
-  lowerSeed           Int
+  lowerSeedTeamId  Int
+  lowerSeed        Int
 
-  bestOf              Int
-  playoffId 		  Int
+  bestOf           Int
+  playoffId        Int
 
-  createdAt           TimestamptzString           @default(now())
-  updatedAt           temporal.updatedAtString()
+  createdAt        TimestamptzString          @default(now())
+  updatedAt        temporal.updatedAtString()
 
-  season              Season                      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  season           Season                     @relation(fields:[seasonId], references:[id], onDelete: Cascade)
 
-  higherSeedTeam      Team                        @relation("HigherSeedTeam", fields: [higherSeedTeamId], references: [id])
-  lowerSeedTeam       Team                        @relation("LowerSeedTeam", fields: [lowerSeedTeamId], references: [id])
+  higherSeedTeam   Team                       @relation("HigherSeedTeam", fields:[higherSeedTeamId], references:[id])
+  lowerSeedTeam    Team                       @relation("LowerSeedTeam", fields:[lowerSeedTeamId], references:[id])
 
-  matches             Match[]
+  matches          Match[]
 
-  playoff 			  Playoff 					  @relation(fields: [playoffId], references: [id], onDelete: Cascade)
+  playoff          Playoff                    @relation(fields:[playoffId], references:[id], onDelete: Cascade)
 
   @@unique([seasonId, round, seriesNumber])
   @@index([seasonId])
@@ -235,15 +255,61 @@ model PlayoffSeries {
 }
 
 model Playoff {
-  id              Int                         @id @default(autoincrement())
-  seasonId        Int                         @unique
-  teamCount       Int
-  reseed          Boolean                     @default(false)
-  createdAt       TimestamptzString           @default(now())
-  updatedAt       temporal.updatedAtString()
+  id        Int                        @id @default(autoincrement())
+  seasonId  Int                        @unique
+  teamCount Int
+  reseed    Boolean                    @default(false)
+  createdAt TimestamptzString          @default(now())
+  updatedAt temporal.updatedAtString()
 
-  season          Season                      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
-  series          PlayoffSeries[]
+  season    Season                     @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  rounds    PlayoffRoundConfig[]
+  series    PlayoffSeries[]
 
   @@map("playoffs")
+}
+
+model PlayoffRoundConfig {
+  id        Int                        @id @default(autoincrement())
+  playoffId Int
+  round     Int
+  name      String
+  bestOf    Int
+  createdAt TimestamptzString          @default(now())
+  updatedAt temporal.updatedAtString()
+
+  playoff   Playoff                    @relation(fields:[playoffId], references:[id], onDelete: Cascade)
+
+  @@unique([playoffId, round])
+  @@map("playoff_round_configs")
+}
+
+model MatchLineup {
+  id             Int          @id @default(autoincrement())
+  matchId        Int
+  teamId         Int
+  rosterPlayerId Int
+  position       Int
+
+  match          Match        @relation(fields:[matchId], references:[id], onDelete: Cascade)
+  team           Team         @relation(fields:[teamId], references:[id])
+  rosterPlayer   RosterPlayer @relation(fields:[rosterPlayerId], references:[id])
+
+  @@unique([matchId, rosterPlayerId])
+  @@unique([matchId, teamId, position])
+  @@index([matchId, teamId])
+  @@map("match_lineups")
+}
+
+model Rack {
+  id           Int   @id @default(autoincrement())
+  matchId      Int
+  rackNumber   Int
+  winnerTeamId Int
+
+  match        Match @relation(fields:[matchId], references:[id], onDelete: Cascade)
+  winnerTeam   Team  @relation(fields:[winnerTeamId], references:[id])
+
+  @@unique([matchId, rackNumber])
+  @@map("racks")
 }
