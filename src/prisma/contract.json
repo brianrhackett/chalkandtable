@@ -3714,7 +3714,7 @@
                   "codecId": "pg/bool@1",
                   "default": {
                     "kind": "literal",
-                    "value": true
+                    "value": false
                   },
                   "nativeType": "bool",
                   "nullable": false
@@ -4225,7 +4225,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "e926d160cedfc883a948c2e7000244f24b8dc5f56d9dd95d1bb639cc73003168"
+    "storageHash": "e22e3f49b1f37ebdb9d1588670965c16b3ba5f353c842d922c5023705620f022"
   },
   "execution": {
     "executionHash": "9d5d4554df243c491a9cb4ae1e9a7a14a382c3aa870c13b8130ac4b7c942bf18",
