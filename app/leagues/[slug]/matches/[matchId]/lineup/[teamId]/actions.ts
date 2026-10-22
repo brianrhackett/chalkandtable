@@ -3,6 +3,8 @@
 import { auth } from "@/auth";
 import { db } from "@/src/prisma/db";
 
+import { getLeaguePermissions } from "@/src/lib/leagues/getLeaguePermissions";
+
 type SaveMatchLineupInput = {
     matchId: number;
     teamId: number;
@@ -43,16 +45,7 @@ export async function saveMatchLineup({
         };
     }
 
-    const user = await db.orm.public.User.first({
-        email: session.user.email,
-    });
-
-    if (!user) {
-        return {
-            success: false,
-            error: "User not found.",
-        };
-    }
+    
 
     const match = await db.orm.public.Match.first({
         id: matchId,
@@ -62,6 +55,13 @@ export async function saveMatchLineup({
         return {
             success: false,
             error: "Match not found.",
+        };
+    }
+
+    if (match.status === "completed") {
+        return {
+            success: false,
+            error: "Lineups cannot be edited after a match is completed.",
         };
     }
 
@@ -90,27 +90,19 @@ export async function saveMatchLineup({
         };
     }
 
-    const membership = await db.orm.public.LeagueUser.first({
-        leagueId: season.leagueId,
-        userId: user.id,
-    });
-
-    if (!membership) {
+    if (!season.active) {
         return {
             success: false,
-            error: "You are not a member of this league.",
+            error: "Lineups cannot be edited for historical seasons.",
         };
     }
 
-    const canManageLineup =
-        membership.role === "owner" ||
-        membership.role === "admin" ||
-        (
-            membership.role === "captain" &&
-            membership.teamId === teamId
-        );
+    const permissions = await getLeaguePermissions(
+        season.leagueId,
+        season.id
+    );
 
-    if (!canManageLineup) {
+    if (!permissions.canManageLineup(teamId)) {
         return {
             success: false,
             error: "You do not have permission to manage this lineup.",

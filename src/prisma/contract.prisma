@@ -78,6 +78,7 @@ model Team {
 model Player {
   id          Int                        @id @default(autoincrement())
   leagueId    Int
+  userId      Int?
   firstName   String
   lastName    String
   email       String?
@@ -87,8 +88,10 @@ model Player {
   updatedAt   temporal.updatedAtString()
 
   league      League                     @relation(fields:[leagueId], references:[id], onDelete: Cascade)
+  user        User?                      @relation(fields:[userId], references:[id], onDelete: SetNull)
   rosterSpots RosterPlayer[]
 
+  @@unique([leagueId, userId])
   @@index([leagueId])
   @@map("players")
 }
@@ -107,21 +110,27 @@ model SeasonTeam {
   @@map("season_teams")
 }
 
+enum CaptainPosition {
+  primary
+  co_captain
+}
+
 model RosterPlayer {
-  id           Int               @id @default(autoincrement())
-  seasonId     Int
-  teamId       Int
-  playerId     Int
-  active       Boolean           @default(true)
-  joinedAt     DateTime?
-  leftAt       DateTime?
-  createdAt    TimestamptzString @default(now())
+  id                Int               @id @default(autoincrement())
+  seasonId          Int
+  teamId            Int
+  playerId          Int
+  active            Boolean           @default(true)
+  captainPosition   CaptainPosition?
+  joinedAt          DateTime?
+  leftAt            DateTime?
+  createdAt         TimestamptzString @default(now())
 
-  season       Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
-  team         Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
-  player       Player            @relation(fields:[playerId], references:[id], onDelete: Cascade)
+  season            Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  team              Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
+  player            Player            @relation(fields:[playerId], references:[id], onDelete: Cascade)
 
-  matchLineups MatchLineup[]
+  matchLineups      MatchLineup[]
 
   @@unique([seasonId, playerId])
   @@index([seasonId, teamId])
@@ -194,6 +203,7 @@ model User {
   updatedAt temporal.updatedAtString()
 
   leagues   LeagueUser[]
+  players   Player[]
 
   @@map("users")
 }

@@ -2,6 +2,9 @@ import { getMatchLineup } from "@/src/lib/leagues/matches/getMatchLineup";
 import LineupEditor from "@/app/components/LineupEditor";
 import Link from "next/link";
 
+import { getLeaguePermissions } from "@/src/lib/leagues/getLeaguePermissions";
+import { notFound } from "next/navigation";
+
 type LineupPageProps = {
     params: Promise<{
         slug: string;
@@ -35,15 +38,33 @@ export default async function LineupPage({
         lineup,
     } = data;
 
+    const permissions = await getLeaguePermissions(
+        league.id,
+        match.seasonId
+    );
+
+    const canEditLineup =
+        permissions.canManageLineup(team.id) &&
+        match.status !== "completed";
+
     return (
         <div className="mx-auto max-w-7xl px-6 py-8">
-
+            
             <div className="mb-6 font-sans text-sm text-[var(--text-muted)]">
                 Schedule
                 <span className="mx-2">/</span>
                 Week {match.week}
                 <span className="mx-2">/</span>
                 {team.name} Lineup
+            </div>
+
+            <div className="mb-6">
+                <Link
+                    href={`/leagues/${league.slug}/schedule`}
+                    className="font-sans text-sm font-semibold text-[var(--accent)] hover:underline"
+                >
+                    &larr; Back to Schedule
+                </Link>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -95,6 +116,7 @@ export default async function LineupPage({
                         }}
                         roster={roster}
                         existingLineup={lineup}
+                        canEditLineup={canEditLineup}
                     />
 
                 </div>

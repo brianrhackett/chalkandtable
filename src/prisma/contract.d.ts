@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'12e31587aa8eb1fbe2eedde436a7e26d16f7fe5da650634f815d74d2b7c04836'>;
+  StorageHashBase<'e926d160cedfc883a948c2e7000244f24b8dc5f56d9dd95d1bb639cc73003168'>;
 export type ExecutionHash =
   ExecutionHashBase<'9d5d4554df243c491a9cb4ae1e9a7a14a382c3aa870c13b8130ac4b7c942bf18'>;
 export type ProfileHash =
@@ -284,6 +284,7 @@ export type FieldOutputTypes = {
     readonly Player: {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly leagueId: CodecTypes['pg/int4@1']['output'];
+      readonly userId: CodecTypes['pg/int4@1']['output'] | null;
       readonly firstName: CodecTypes['pg/text@1']['output'];
       readonly lastName: CodecTypes['pg/text@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'] | null;
@@ -335,6 +336,7 @@ export type FieldOutputTypes = {
       readonly teamId: CodecTypes['pg/int4@1']['output'];
       readonly playerId: CodecTypes['pg/int4@1']['output'];
       readonly active: CodecTypes['pg/bool@1']['output'];
+      readonly captainPosition: 'primary' | 'co_captain' | null;
       readonly joinedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly leftAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -431,6 +433,7 @@ export type FieldInputTypes = {
     readonly Player: {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly leagueId: CodecTypes['pg/int4@1']['input'];
+      readonly userId: CodecTypes['pg/int4@1']['input'] | null;
       readonly firstName: CodecTypes['pg/text@1']['input'];
       readonly lastName: CodecTypes['pg/text@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'] | null;
@@ -482,6 +485,7 @@ export type FieldInputTypes = {
       readonly teamId: CodecTypes['pg/int4@1']['input'];
       readonly playerId: CodecTypes['pg/int4@1']['input'];
       readonly active: CodecTypes['pg/bool@1']['input'];
+      readonly captainPosition: 'primary' | 'co_captain' | null;
       readonly joinedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly leftAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -585,6 +589,7 @@ export type StorageColumnTypes = {
       readonly leagueId: CodecTypes['pg/int4@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly userId: CodecTypes['pg/int4@1']['output'] | null;
     };
     readonly playoff_round_configs: {
       readonly bestOf: CodecTypes['pg/int4@1']['output'];
@@ -625,6 +630,7 @@ export type StorageColumnTypes = {
     };
     readonly roster_players: {
       readonly active: CodecTypes['pg/bool@1']['output'];
+      readonly captainPosition: 'primary' | 'co_captain' | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly joinedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
@@ -732,6 +738,7 @@ export type StorageColumnInputTypes = {
       readonly leagueId: CodecTypes['pg/int4@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly userId: CodecTypes['pg/int4@1']['input'] | null;
     };
     readonly playoff_round_configs: {
       readonly bestOf: CodecTypes['pg/int4@1']['input'];
@@ -772,6 +779,7 @@ export type StorageColumnInputTypes = {
     };
     readonly roster_players: {
       readonly active: CodecTypes['pg/bool@1']['input'];
+      readonly captainPosition: 'primary' | 'co_captain' | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly joinedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
@@ -900,6 +908,7 @@ export namespace Models {
   export type public_Player = {
     id: CodecTypes['pg/int4@1']['output'];
     leagueId: CodecTypes['pg/int4@1']['output'];
+    userId: CodecTypes['pg/int4@1']['output'] | null;
     firstName: CodecTypes['pg/text@1']['output'];
     lastName: CodecTypes['pg/text@1']['output'];
     email: CodecTypes['pg/text@1']['output'] | null;
@@ -909,7 +918,8 @@ export namespace Models {
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     league: public_League;
     rosterSpots: public_RosterPlayer[];
-    readonly [RelationKeys]?: 'league' | 'rosterSpots';
+    user: public_User | null;
+    readonly [RelationKeys]?: 'league' | 'rosterSpots' | 'user';
   };
   export type public_SeasonTeam = {
     id: CodecTypes['pg/int4@1']['output'];
@@ -927,6 +937,7 @@ export namespace Models {
     teamId: CodecTypes['pg/int4@1']['output'];
     playerId: CodecTypes['pg/int4@1']['output'];
     active: CodecTypes['pg/bool@1']['output'];
+    captainPosition: 'primary' | 'co_captain' | null;
     joinedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
     leftAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -977,7 +988,8 @@ export namespace Models {
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     leagues: public_LeagueUser[];
-    readonly [RelationKeys]?: 'leagues';
+    players: public_Player[];
+    readonly [RelationKeys]?: 'leagues' | 'players';
   };
   export type public_LeagueUser = {
     id: CodecTypes['pg/int4@1']['output'];
@@ -1529,6 +1541,11 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
                 };
+                readonly userId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
                 readonly firstName: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
@@ -1571,12 +1588,18 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
+              uniques: readonly [{ readonly columns: readonly ['leagueId', 'userId'] }];
               indexes: readonly [
                 {
                   readonly name: 'players_leagueId_idx_1296e985';
                   readonly prefix: 'players_leagueId_idx';
                   readonly columns: readonly ['leagueId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'players_userId_idx_a489d58a';
+                  readonly prefix: 'players_userId_idx';
+                  readonly columns: readonly ['userId'];
                   readonly unique: false;
                 },
               ];
@@ -1590,6 +1613,18 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'leagues';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'players';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -1977,6 +2012,11 @@ type ContractBase = Omit<
                     readonly value: DefaultLiteralValue<'pg/bool@1', true>;
                   };
                 };
+                readonly captainPosition: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
                 readonly joinedAt: {
                   readonly nativeType: 'timestamptz';
                   readonly codecId: 'pg/timestamptz-temporal@1';
@@ -2094,7 +2134,7 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly default: {
                     readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
                   };
                 };
               };
@@ -2436,6 +2476,10 @@ type ContractBase = Omit<
             };
           };
           readonly valueSet: {
+            readonly CaptainPosition: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['primary', 'co_captain'];
+            };
             readonly MatchFormat: {
               readonly kind: 'valueSet';
               readonly values: readonly ['Singles', 'Doubles'];
@@ -2893,6 +2937,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
+              readonly userId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly firstName: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -2952,6 +3000,15 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['playerId'];
                 };
               };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
             };
             readonly storage: {
               readonly table: 'players';
@@ -2959,6 +3016,7 @@ type ContractBase = Omit<
               readonly fields: {
                 readonly id: { readonly column: 'id' };
                 readonly leagueId: { readonly column: 'leagueId' };
+                readonly userId: { readonly column: 'userId' };
                 readonly firstName: { readonly column: 'firstName' };
                 readonly lastName: { readonly column: 'lastName' };
                 readonly email: { readonly column: 'email' };
@@ -3322,6 +3380,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
               };
+              readonly captainPosition: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly joinedAt: {
                 readonly nullable: true;
                 readonly type: {
@@ -3399,6 +3461,7 @@ type ContractBase = Omit<
                 readonly teamId: { readonly column: 'teamId' };
                 readonly playerId: { readonly column: 'playerId' };
                 readonly active: { readonly column: 'active' };
+                readonly captainPosition: { readonly column: 'captainPosition' };
                 readonly joinedAt: { readonly column: 'joinedAt' };
                 readonly leftAt: { readonly column: 'leftAt' };
                 readonly createdAt: { readonly column: 'createdAt' };
@@ -3829,6 +3892,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['userId'];
                 };
               };
+              readonly players: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Player';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
             };
             readonly storage: {
               readonly table: 'users';
@@ -3913,6 +3987,13 @@ type ContractBase = Omit<
             readonly members: readonly [
               { readonly name: 'Singles'; readonly value: 'Singles' },
               { readonly name: 'Doubles'; readonly value: 'Doubles' },
+            ];
+          };
+          readonly CaptainPosition: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'primary'; readonly value: 'primary' },
+              { readonly name: 'co_captain'; readonly value: 'co_captain' },
             ];
           };
           readonly MatchStatus: {

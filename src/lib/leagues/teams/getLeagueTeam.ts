@@ -190,9 +190,6 @@ export async function getLeagueTeam(
 	const roster = rosterPlayers.map(
 		(rosterPlayer) => rosterPlayer.player
 	);
-
-	console.log("roster: ");console.log(roster);
-	console.log("rosterPlayers: ");console.log(rosterPlayers);
 	
 	const seasonTeam = await db.orm.public.SeasonTeam.first({
 		seasonId: season.id,

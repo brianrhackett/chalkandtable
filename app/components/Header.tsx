@@ -27,7 +27,7 @@ export default async function Header() {
 						For Leagues
 					</Link>
 
-                    { !session.user ? (
+                    { !session?.user ? (
                         <Link
                             href="/login"
                             className="btn-primary"

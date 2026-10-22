@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getMatch } from "@/src/lib/leagues/matches/getMatch";
 import RackEditor from "@/app/components/RackEditor";
 
+import { getLeaguePermissions } from "@/src/lib/leagues/getLeaguePermissions";
+
 type MatchPageProps = {
     params: Promise<{
         slug: string;
@@ -33,6 +35,24 @@ export default async function MatchPage({
         awayLineup,
         racks,
     } = data;
+
+    const permissions = await getLeaguePermissions(
+        league.id,
+        match.seasonId
+    );
+
+    const canEditRacks = permissions.canManageMatch(
+        match.homeTeamId,
+        match.awayTeamId
+    );
+
+    const canEditAwayLineup = permissions.canManageLineup(
+        awayTeam.id
+    );
+
+    const canEditHomeLineup = permissions.canManageLineup(
+        homeTeam.id
+    );
 
     return (
         <div className="mx-auto max-w-5xl px-6 py-8">
@@ -109,6 +129,7 @@ export default async function MatchPage({
                                 rackNumber: rack.rackNumber,
                                 winnerTeamId: rack.winnerTeamId,
                             }))}
+                            canEditRacks={canEditRacks}
                         />
                         <div className="grid gap-8 border-t border-[var(--surface-alt)] px-6 py-6 sm:grid-cols-2">
                             {awayTeam.playerStatsEnabled && (
@@ -117,13 +138,14 @@ export default async function MatchPage({
                                         <h2 className="font-serif text-lg font-bold">
                                             {awayTeam.name} Lineup
                                         </h2>
-
-                                        <Link
-                                            href={`/leagues/${league.slug}/matches/${match.id}/lineup/${awayTeam.id}`}
-                                            className="font-sans text-xs font-semibold text-[var(--accent)] hover:underline"
-                                        >
-                                            Edit
-                                        </Link>
+                                        {canEditAwayLineup && match.status !== "completed" && (
+                                            <Link
+                                                href={`/leagues/${league.slug}/matches/${match.id}/lineup/${awayTeam.id}`}
+                                                className="font-sans text-xs font-semibold text-[var(--accent)] hover:underline"
+                                            >
+                                                Edit
+                                            </Link>
+                                        )}
                                     </div>
 
                                     {awayLineup.length > 0 ? (
@@ -157,13 +179,14 @@ export default async function MatchPage({
                                         <h2 className="font-serif text-lg font-bold">
                                             {homeTeam.name} Lineup
                                         </h2>
-
-                                        <Link
-                                            href={`/leagues/${league.slug}/matches/${match.id}/lineup/${homeTeam.id}`}
-                                            className="font-sans text-xs font-semibold text-[var(--accent)] hover:underline"
-                                        >
-                                            Edit
-                                        </Link>
+                                        {canEditHomeLineup && match.status !== "completed" && (
+                                            <Link
+                                                href={`/leagues/${league.slug}/matches/${match.id}/lineup/${homeTeam.id}`}
+                                                className="font-sans text-xs font-semibold text-[var(--accent)] hover:underline"
+                                            >
+                                                Edit
+                                            </Link>
+                                        )}
                                     </div>
 
                                     {homeLineup.length > 0 ? (

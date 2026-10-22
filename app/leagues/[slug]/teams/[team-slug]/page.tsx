@@ -5,8 +5,14 @@ import { notFound } from "next/navigation";
 import { formatMatchDate } from "@/src/lib/formatMatchDate.ts";
 
 import { getLeagueTeam } from "@/src/lib/leagues/teams/getLeagueTeam";
-import { getPlayerStats } from "@/src/lib/leagues/teams/getPlayerStats"
+import { getPlayerStats } from "@/src/lib/leagues/teams/getPlayerStats";
+import { getAvailablePlayers } from "@/src/lib/leagues/teams/getAvailablePlayers";
+import { getRemovablePlayers } from "@/src/lib/leagues/teams/getRemovablePlayers";
 import SeasonSelect from "@/app/components/SeasonSelect";
+import RosterManager from "@/app/components/RosterManager";
+import RosterPlayerActions from "@/app/components/RosterPlayerActions";
+import CaptainEditor from "@/app/components/CaptainEditor";
+
 
 
 type TeamPageProps = {
@@ -53,6 +59,14 @@ export default async function TeamPage({
 		recentMatches,
 	} = data;
 
+	const captain = rosterPlayers.find(
+		(player) => player.captainPosition === "primary"
+	);
+
+	const coCaptain = rosterPlayers.find(
+		(player) => player.captainPosition === "co_captain"
+	);
+
 	const playerStats = await getPlayerStats(
 		season.id,
 		team.id
@@ -65,18 +79,43 @@ export default async function TeamPage({
 		])
 	);
 
-	const players = seasonTeam.playerStatsEnabled
-		? playerStats.map((stats) => ({
-			...rosterPlayers.find(
-				(player) => player.id === stats.rosterPlayerId
-			)!,
-			stats,
-		}))
-		: rosterPlayers.map((player) => ({
+	const removablePlayerIds = new Set(
+		await getRemovablePlayers(season.id, team.id)
+	);
+
+	const players = rosterPlayers.map((player) => {
+		const stats = seasonTeam.playerStatsEnabled
+			? playerStats.find(
+				(stats) => stats.rosterPlayerId === player.id
+			) ?? null
+			: null;
+
+		return {
 			...player,
-			stats: null,
-		}));
-	console.log("players: ");console.log( players );
+			stats,
+			canRemove: removablePlayerIds.has(player.id),
+		};
+	})
+	.sort((a, b) => {
+        // Players with stats come first
+        if (!a.stats && !b.stats) return 0;
+        if (!a.stats) return 1;
+        if (!b.stats) return -1;
+
+        // Most wins first
+        if (b.stats.wins !== a.stats.wins) {
+            return b.stats.wins - a.stats.wins;
+        }
+
+        // Fewest losses breaks ties
+        return a.stats.losses - b.stats.losses;
+    });
+
+	const availablePlayers = await getAvailablePlayers(
+		league.id,
+		season.id
+	);
+
 	return (
 		<main className="mx-auto w-full max-w-7xl px-6 py-12">
 			<Link
@@ -112,8 +151,18 @@ export default async function TeamPage({
 				
 					<div>
 						<SeasonSelect 
-							seasons={seasons}
-							selectedSeason={season}
+							seasons={seasons.map((season) => ({
+							id: season.id,
+							name: season.name,
+							slug: season.slug,
+							active: season.active,
+							}))}
+							selectedSeason={{
+								id: season.id,
+								name: season.name,
+								slug: season.slug,
+								active: season.active,
+							}}
 						/>
 					</div>
 				</div>
@@ -276,12 +325,65 @@ export default async function TeamPage({
 
 						<section>
 							<h2 className="font-[family-name:var(--font-serif)] text-lg text-[var(--accent)] font-semibold">
+								Team Captains
+							</h2>
+							<div className="mt-4 overflow-hidden rounded-md border border-[var(--surface-alt)] bg-[var(--surface)]">
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="border-b border-border text-left">
+											<th className="px-3 py-3">Role</th>
+											<th className="px-3 py-3">Name</th>
+											<th className="px-3 py-3">Contact</th>
+										</tr>
+									</thead>
+
+									<tbody className="divide-y divide-[var(--surface-alt)]">
+										<tr>
+											<td className="px-3 py-3">Captain</td>
+											<td className="px-3 py-3">{captain?.player.firstName} {captain?.player.lastName}</td>
+											<td className="px-3 py-3">
+												<div>{captain?.player.phone}</div>
+												<div>{captain?.player.email}</div> 
+											</td>
+										</tr>
+										<tr>
+											<td className="px-3 py-3">Co-Captain</td>
+											<td className="px-3 py-3">{coCaptain?.player.firstName} {coCaptain?.player.lastName}</td>
+											<td className="px-3 py-3">
+												<div>{coCaptain?.player.phone}</div>
+												<div>{coCaptain?.player.email}</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								{season.active && (
+									<CaptainEditor
+										players={rosterPlayers.map((rosterPlayer) => ({
+											id: rosterPlayer.id,
+											firstName: rosterPlayer.player.firstName,
+											lastName: rosterPlayer.player.lastName,
+											email: rosterPlayer.player.email,
+											phone: rosterPlayer.player.phone,
+										}))}
+										captainId={captain?.id ?? null}
+										coCaptainId={coCaptain?.id ?? null}
+										leagueId={league.id}
+										seasonId={season.id}
+										teamId={team.id}
+									/>
+								)}
+							</div>
+						</section>
+
+						<section>
+							<h2 className="font-[family-name:var(--font-serif)] text-lg text-[var(--accent)] font-semibold">
 								Roster
 							</h2>
 							<div className="mt-4 overflow-hidden rounded-md border border-[var(--surface-alt)] bg-[var(--surface)]">
 								<table className="w-full text-sm">
 									<thead>
 										<tr className="border-b border-border text-left">
+											<th className="w-px whitespace-nowrap"></th>
 											<th className="px-4 py-3 font-semibold">Player</th>
 
 											{seasonTeam.playerStatsEnabled && (
@@ -298,6 +400,22 @@ export default async function TeamPage({
 										{players.map((player) => (
 								
 											<tr key={player.id}>
+												<td className="px-4 py-3">
+													<RosterPlayerActions
+														rosterPlayerId={player.id}
+														playerId={player.player.id}
+														firstName={player.player.firstName}
+														lastName={player.player.lastName}
+														email={player.player.email}
+														phone={player.player.phone}
+														leagueId={league.id}
+														seasonId={season.id}
+														teamId={team.id}
+														canRemove={player.canRemove}
+														userId={player.player.userId}
+														captainPosition={player.captainPosition}
+													/>
+												</td>
 												<td className="px-4 py-3">
 													{player.player.firstName} {player.player.lastName}
 												</td>
@@ -318,6 +436,18 @@ export default async function TeamPage({
 										))}	
 									</tbody>
 								</table>
+
+								<RosterManager
+								    leagueId={league.id}
+									seasonId={season.id}
+									teamId={team.id}
+								    availablePlayers={availablePlayers.map((player) => ({
+										id: player.id,
+										firstName: player.firstName,
+										lastName: player.lastName,
+									}))}
+								/>
+
 							</div>
 						</section>
 					</div>

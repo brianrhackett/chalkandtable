@@ -8,6 +8,8 @@ import SeasonSelect from "@/app/components/SeasonSelect";
 import ScoreModal from "@/app/components/ScoreModal";
 import { ListOrdered, Info } from "lucide-react";
 
+import { getLeaguePermissions } from "@/src/lib/leagues/getLeaguePermissions";
+
 type SchedulePageProps = {
 	params: Promise<{
 		slug: string;
@@ -42,6 +44,10 @@ export default async function SchedulePage({
 		seasons,
 		weeks,
 	} = data;
+
+	const permissions = season
+		? await getLeaguePermissions(league.id, season.id)
+		: null;
 
 	const scheduleUrl = (view?: string) => {
 		const params = new URLSearchParams();
@@ -172,7 +178,8 @@ export default async function SchedulePage({
 										<div className="flex items-center gap-5 justify-end">
 											{(
 												match.awayTeam.playerStatsEnabled &&
-												match.status !== 'completed'
+												match.status !== 'completed' &&
+												permissions?.canManageLineup(match.awayTeam.id)
 												) && (
 												<Link
 													href={`/leagues/${league.slug}/matches/${match.id}/lineup/${match.awayTeam.id}`}
@@ -218,7 +225,8 @@ export default async function SchedulePage({
 
 											{(
 												match.homeTeam.playerStatsEnabled &&
-												match.status !== 'completed'
+												match.status !== 'completed' &&
+												permissions?.canManageLineup(match.homeTeam.id)
 												) && (
 												<Link
 													href={`/leagues/${league.slug}/matches/${match.id}/lineup/${match.homeTeam.id}`}
@@ -247,13 +255,19 @@ export default async function SchedulePage({
 													/> Details
 												</Link>
 											)}
-											<ScoreModal
-												matchId={match.id}
-												awayTeam={match.awayTeam}
-												homeTeam={match.homeTeam}
-												awayScore={match.awayScore}
-												homeScore={match.homeScore}
-											/>
+
+											{permissions?.canManageMatch(
+												match.homeTeam.id,
+												match.awayTeam.id
+											) && (
+												<ScoreModal
+													matchId={match.id}
+													awayTeam={match.awayTeam}
+													homeTeam={match.homeTeam}
+													awayScore={match.awayScore}
+													homeScore={match.homeScore}
+												/>
+											)}
 										</div>
 									</div>
 								))}

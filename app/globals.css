@@ -201,6 +201,18 @@ body {
 	}
 }
 
+@utility btn-tertiary {
+	@apply rounded-md border px-4 py-2 font-semibold transition-colors cursor-pointer;
+
+	border-color: var(--text);
+	color: var(--text);
+
+	&:hover {
+		background-color: var(--text);
+		color: var(--background);
+	}
+}
+
 @utility btn-danger-subtle {
 	@apply rounded-md px-3 py-2 font-semibold transition-colors cursor-pointer;
 
@@ -208,6 +220,17 @@ body {
 
 	&:hover {
 		background-color: color-mix(in srgb, var(--danger) 12%, transparent);
+	}
+}
+
+@utility btn-danger {
+	@apply rounded-md px-4 py-2 font-semibold transition-colors cursor-pointer;
+
+	background-color: var(--danger);
+	color: var(--background);
+	
+	&:hover {
+		opacity: 0.8;
 	}
 }
 

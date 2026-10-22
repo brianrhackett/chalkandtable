@@ -19,6 +19,7 @@ type RackEditorProps = {
     awayTeam: Team;
     homeTeam: Team;
     existingRacks: RackResult[];
+    canEditRacks: boolean;
 };
 
 export default function RackEditor({
@@ -27,6 +28,7 @@ export default function RackEditor({
     awayTeam,
     homeTeam,
     existingRacks,
+    canEditRacks,
 }: RackEditorProps) {
     
     const [isPending, startTransition] = useTransition();
@@ -125,6 +127,7 @@ export default function RackEditor({
 
                         <button
                             type="button"
+                            disabled={!canEditRacks || isPending}
                             onClick={() =>
                                 selectWinner(
                                     rack.rackNumber,
@@ -142,6 +145,7 @@ export default function RackEditor({
 
                         <button
                             type="button"
+                            disabled={!canEditRacks || isPending}
                             onClick={() =>
                                 selectWinner(
                                     rack.rackNumber,
@@ -160,42 +164,47 @@ export default function RackEditor({
                 ))}
             </div>
 
-            <div className="mt-4 flex items-center justify-center gap-4">
-                <button
-                    type="button"
-                    onClick={addRack}
-                    className="font-sans text-sm font-semibold text-[var(--accent)] hover:underline"
-                >
-                    + Add Rack
-                </button>
 
-                {racks.length > 1 && (
-                    <button
-                        type="button"
-                        onClick={removeRack}
-                        className="font-sans text-sm font-semibold text-[var(--text-muted)] hover:underline"
-                    >
-                        Remove Rack
-                    </button>
-                )}
-            </div>
+            {canEditRacks && (
+                <>
+                    <div className="mt-4 flex items-center justify-center gap-4">
+                        <button
+                            type="button"
+                            onClick={addRack}
+                            className="font-sans text-sm font-semibold text-[var(--accent)] hover:underline"
+                        >
+                            + Add Rack
+                        </button>
 
-            <div className="mt-6 text-center">
-                <button
-                    type="button"
-                    onClick={saveRacks}
-                    disabled={isPending}
-                    className="rounded-lg bg-[var(--accent)] px-5 py-2 font-sans text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    {isPending ? "Saving..." : "Save Results"}
-                </button>
+                        {racks.length > 1 && (
+                            <button
+                                type="button"
+                                onClick={removeRack}
+                                className="font-sans text-sm font-semibold text-[var(--text-muted)] hover:underline"
+                            >
+                                Remove Rack
+                            </button>
+                        )}
+                    </div>
 
-                {message && (
-                    <p className="mt-2 font-sans text-sm text-[var(--text-muted)]">
-                        {message}
-                    </p>
-                )}
-            </div>
+                    <div className="mt-6 text-center">
+                        <button
+                            type="button"
+                            onClick={saveRacks}
+                            disabled={isPending}
+                            className="rounded-lg bg-[var(--accent)] px-5 py-2 font-sans text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {isPending ? "Saving..." : "Save Results"}
+                        </button>
+
+                        {message && (
+                            <p className="mt-2 font-sans text-sm text-[var(--text-muted)]">
+                                {message}
+                            </p>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 }

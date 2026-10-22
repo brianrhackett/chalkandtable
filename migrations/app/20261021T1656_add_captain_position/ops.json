@@ -1,0 +1,86 @@
+[
+  {
+    "id": "column.public.roster_players.captainPosition",
+    "label": "Add column \"captainPosition\" to \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "captainPosition",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"captainPosition\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "roster_players",
+          "captainPosition"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"captainPosition\"",
+        "sql": "ALTER TABLE \"public\".\"roster_players\" ADD COLUMN \"captainPosition\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"captainPosition\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "roster_players",
+          "captainPosition"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.roster_players.roster_players_captainPosition_check_6cc4391e",
+    "label": "Add check constraint \"roster_players_captainPosition_check_6cc4391e\" on \"roster_players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "roster_players_captainPosition_check_6cc4391e",
+        "table": "roster_players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"roster_players_captainPosition_check_6cc4391e\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_captainPosition_check_6cc4391e",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"roster_players_captainPosition_check_6cc4391e\"",
+        "sql": "ALTER TABLE \"public\".\"roster_players\" ADD CONSTRAINT \"roster_players_captainPosition_check_6cc4391e\" CHECK (\"captainPosition\" IN ('primary', 'co_captain'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"roster_players_captainPosition_check_6cc4391e\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "roster_players_captainPosition_check_6cc4391e",
+          "public",
+          "\"public\".\"roster_players\""
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,167 @@
+[
+  {
+    "id": "column.public.players.userId",
+    "label": "Add column \"userId\" to \"players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "userId",
+        "table": "players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"userId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "players",
+          "userId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"userId\"",
+        "sql": "ALTER TABLE \"public\".\"players\" ADD COLUMN \"userId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"userId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "players",
+          "userId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.players.players_leagueId_userId_key",
+    "label": "Add unique constraint on \"players\" (leagueId, userId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "players_leagueId_userId_key",
+        "table": "players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"players_leagueId_userId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "players_leagueId_userId_key",
+          "public",
+          "\"public\".\"players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"players_leagueId_userId_key\"",
+        "sql": "ALTER TABLE \"public\".\"players\" ADD CONSTRAINT \"players_leagueId_userId_key\" UNIQUE (\"leagueId\", \"userId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"players_leagueId_userId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "players_leagueId_userId_key",
+          "public",
+          "\"public\".\"players\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.players.players_userId_idx_a489d58a",
+    "label": "Create index \"players_userId_idx_a489d58a\" on \"players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "players_userId_idx_a489d58a",
+        "table": "players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"players_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"players_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"players_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"players_userId_idx_a489d58a\" ON \"public\".\"players\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"players_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"players_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.players.players_userId_fkey",
+    "label": "Add foreign key \"players_userId_fkey\" on \"players\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "players_userId_fkey",
+        "table": "players"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"players_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "players_userId_fkey",
+          "public",
+          "\"public\".\"players\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"players_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"players\"\nADD CONSTRAINT \"players_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE SET NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"players_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "players_userId_fkey",
+          "public",
+          "\"public\".\"players\""
+        ]
+      }
+    ]
+  }
+]

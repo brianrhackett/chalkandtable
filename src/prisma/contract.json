@@ -69,6 +69,19 @@
     "namespaces": {
       "public": {
         "enum": {
+          "CaptainPosition": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "primary",
+                "value": "primary"
+              },
+              {
+                "name": "co_captain",
+                "value": "co_captain"
+              }
+            ]
+          },
           "MatchFormat": {
             "codecId": "pg/text@1",
             "members": [
@@ -800,6 +813,13 @@
                   "codecId": "pg/timestamptz-string@1",
                   "kind": "scalar"
                 }
+              },
+              "userId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -833,6 +853,22 @@
                   "model": "RosterPlayer",
                   "namespace": "public"
                 }
+              },
+              "user": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -863,6 +899,9 @@
                 },
                 "updatedAt": {
                   "column": "updatedAt"
+                },
+                "userId": {
+                  "column": "userId"
                 }
               },
               "namespaceId": "public",
@@ -1395,6 +1434,19 @@
                   "kind": "scalar"
                 }
               },
+              "captainPosition": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "CaptainPosition",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -1514,6 +1566,9 @@
               "fields": {
                 "active": {
                   "column": "active"
+                },
+                "captainPosition": {
+                  "column": "captainPosition"
                 },
                 "createdAt": {
                   "column": "createdAt"
@@ -2166,6 +2221,21 @@
                 },
                 "to": {
                   "model": "LeagueUser",
+                  "namespace": "public"
+                }
+              },
+              "players": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "Player",
                   "namespace": "public"
                 }
               }
@@ -2908,6 +2978,11 @@
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
                   "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -2927,6 +3002,23 @@
                     "namespaceId": "public",
                     "tableName": "leagues"
                   }
+                },
+                {
+                  "onDelete": "setNull",
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "players"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
                 }
               ],
               "indexes": [
@@ -2937,6 +3029,14 @@
                   "name": "players_leagueId_idx_1296e985",
                   "prefix": "players_leagueId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "players_userId_idx_a489d58a",
+                  "prefix": "players_userId_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -2944,7 +3044,14 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "leagueId",
+                    "userId"
+                  ]
+                }
+              ]
             },
             "playoff_round_configs": {
               "columns": {
@@ -3409,6 +3516,13 @@
               ]
             },
             "roster_players": {
+              "checks": [
+                {
+                  "expression": "\"captainPosition\" IN ('primary', 'co_captain')",
+                  "name": "roster_players_captainPosition_check_6cc4391e",
+                  "prefix": "roster_players_captainPosition_check"
+                }
+              ],
               "columns": {
                 "active": {
                   "codecId": "pg/bool@1",
@@ -3418,6 +3532,17 @@
                   },
                   "nativeType": "bool",
                   "nullable": false
+                },
+                "captainPosition": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "CaptainPosition",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
                 },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
@@ -3589,7 +3714,7 @@
                   "codecId": "pg/bool@1",
                   "default": {
                     "kind": "literal",
-                    "value": false
+                    "value": true
                   },
                   "nativeType": "bool",
                   "nullable": false
@@ -4063,6 +4188,13 @@
             }
           },
           "valueSet": {
+            "CaptainPosition": {
+              "kind": "valueSet",
+              "values": [
+                "primary",
+                "co_captain"
+              ]
+            },
             "MatchFormat": {
               "kind": "valueSet",
               "values": [
@@ -4093,7 +4225,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "12e31587aa8eb1fbe2eedde436a7e26d16f7fe5da650634f815d74d2b7c04836"
+    "storageHash": "e926d160cedfc883a948c2e7000244f24b8dc5f56d9dd95d1bb639cc73003168"
   },
   "execution": {
     "executionHash": "9d5d4554df243c491a9cb4ae1e9a7a14a382c3aa870c13b8130ac4b7c942bf18",

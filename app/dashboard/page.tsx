@@ -27,11 +27,57 @@ export default async function DashboardPage() {
         .include("league", (league) =>
 	    	league.include("seasons", (season) =>
                 season
-                        .include("seasonTeams")
-                        .include("matches")
+                    .include("seasonTeams")
+                    .include("matches", (match) =>
+                        match
+                            .include("homeTeam", (team) =>
+                                team.include("venue")
+                            )
+                            .include("awayTeam")
+                    )
             )
     	)
         .all();
+
+    const players = await db.orm.public.Player
+        .where({
+            userId: user.id,
+        })
+        .include("league", (league) =>
+            league.include("seasons", (season) =>
+                season
+                    .include("seasonTeams")
+                    .include("matches", (match) =>
+                        match
+                            .include("homeTeam", (team) =>
+                                team.include("venue")
+                            )
+                            .include("awayTeam")
+                    )
+            )
+        )
+        .all();
+
+    const captainAssignments = (
+        await Promise.all(
+            players.map((player) =>
+                db.orm.public.RosterPlayer
+                    .where({
+                        playerId: player.id,
+                        active: true,
+                    })
+                    .all()
+            )
+        )
+    ).flat();
+
+    const leagues = [
+        ...memberships.map((membership) => membership.league),
+        ...players.map((player) => player.league),
+    ].filter(
+        (league, index, all) =>
+            all.findIndex((item) => item.id === league.id) === index
+    );
 
 	return (
         <>
@@ -43,7 +89,7 @@ export default async function DashboardPage() {
                             Welcome back, {session.user.name}.
                         </h1>
                         <p className="mt-3 text-[var(--text-muted)]">
-                            Here are the leagues you manage
+                            Your leagues, teams, and upcoming matches.
                         </p>
                     </div>
                 
@@ -68,45 +114,98 @@ export default async function DashboardPage() {
                         </div>
 
                         <span className="text-sm text-[var(--text-muted)]">
-                            {memberships.length} {memberships.length === 1 ? "league" : "leagues"}
+                            {leagues.length} {leagues.length === 1 ? "league" : "leagues"}
                         </span>
                     </div>
 
                     
                     <div className="grid gap-5">
-                        {memberships.map((membership) => {
-                            const league = membership.league;
+                        {leagues.map((league) => {
                             const activeSeason = league.seasons.find(
                                 (season) => season.active
                             );
 
-                            const upcomingMatches = activeSeason?.matches
-                                .filter((match) => match.status === "scheduled")
-                                .sort(
-                                    (a, b) =>
-                                        new Date(a.scheduledAt).getTime() -
-                                        new Date(b.scheduledAt).getTime()
-                                )
-                                .slice(0, 5) ?? [];
+                            const player = players.find(
+                                (player) => player.leagueId === league.id
+                            );
 
-                            const completedMatches = activeSeason?.matches
-                                .filter((match) => match.status === "completed")
-                                .sort(
-                                    (a, b) =>
-                                        new Date(b.scheduledAt).getTime() -
-                                        new Date(a.scheduledAt).getTime()
+                            const isCaptain = Boolean(
+                                player &&
+                                activeSeason &&
+                                captainAssignments.some(
+                                    (rosterPlayer) =>
+                                        rosterPlayer.playerId === player.id &&
+                                        rosterPlayer.seasonId === activeSeason.id &&
+                                        (
+                                            rosterPlayer.captainPosition === "primary" ||
+                                            rosterPlayer.captainPosition === "co_captain"
+                                        )
                                 )
-                                .slice(0, 5) ?? [];
+                            );
+
+                            const membership = memberships.find(
+                                (membership) => membership.leagueId === league.id
+                            );
+
+                            const isOwnerOrAdmin =
+                                membership?.role === "owner" ||
+                                membership?.role === "admin";
+
+                            const captainTeamIds = player && activeSeason
+                                ? captainAssignments
+                                    .filter(
+                                        (rosterPlayer) =>
+                                            rosterPlayer.playerId === player.id &&
+                                            rosterPlayer.seasonId === activeSeason.id &&
+                                            rosterPlayer.active &&
+                                            (
+                                                rosterPlayer.captainPosition === "primary" ||
+                                                rosterPlayer.captainPosition === "co_captain"
+                                            )
+                                    )
+                                    .map((rosterPlayer) => rosterPlayer.teamId)
+                                : [];
+
+                            const visibleMatches = activeSeason?.matches.filter((match) =>
+                                isOwnerOrAdmin ||
+                                captainTeamIds.includes(match.homeTeamId) ||
+                                captainTeamIds.includes(match.awayTeamId)
+                            ) ?? [];
+
+                            const upcomingMatches = visibleMatches
+                                .filter((match) => match.status === "scheduled")
+                                .sort((a, b) =>
+                                    Temporal.Instant.compare(
+                                        a.scheduledAt,
+                                        b.scheduledAt
+                                    )
+                                )
+                                .slice(0, 5);
+
+                            const completedMatches = visibleMatches
+                                .filter((match) => match.status === "completed")
+                                .sort((a, b) =>
+                                    Temporal.Instant.compare(
+                                        b.scheduledAt,
+                                        a.scheduledAt
+                                    )
+                                )
+                                .slice(0, 5);
+
                             return (
-                                <div className="grid gap-5 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                                <div 
+                                    key={league.id} 
+                                    className="grid gap-5 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+                                >
                                     <div
-                                        key={league.id}
                                         className="rounded-lg border border-[var(--surface-alt)] bg-[var(--surface)] p-6 md:col-span-2 xl:col-span-1"
                                     >
                                         <div className="flex items-end justify-between gap-6">
                                             <div className="w-full">
                                                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
-                                                    {membership.role}
+                                                    {memberships.find(
+                                                        (membership) => membership.leagueId === league.id
+                                                    )?.role ?? (isCaptain ? "Captain" : "Player")}
                                                 </p>
 
                                                 <h3 className="font-[family-name:var(--font-serif)] text-2xl">
@@ -144,62 +243,106 @@ export default async function DashboardPage() {
                                                 href={`/leagues/${league.slug}`}
                                                 className="btn-primary block text-center"
                                             >
-                                                Manage League &rarr;
+                                                View League &rarr;
                                             </Link>
                                         </div>
                                     </div>
 
                                     <div className="rounded-lg border border-[var(--surface-alt)] p-6">
-                                        <h3 className="font-[family-name:var(--font-display)] text-xl uppercase">
+                                        <h3 className="font-[family-name:var(--font-display)] text-xl uppercase text-[var(--accent)]">
                                             Upcoming
                                         </h3>
-
-                                        {upcomingMatches.length > 0 ? (
+                                        <div className="divide-y divide-[var(--surface-alt)]">
+                                            {upcomingMatches.length > 0 ? (
+                                                upcomingMatches.map((match) => {
+                                                    return (
+                                                        <Link 
+                                                            key={match.id}
+                                                            className="grid grid-cols-3 gap-4 py-4"
+                                                            href={`/leagues/${league.slug}/matches/${match.id}`}
+                                                        >
+                                                            <div>{match.awayTeam.name}</div>
+                                                            <div
+                                                                className="text-center"
+                                                            >
+                                                                @
+                                                            </div>
+                                                            <div
+                                                                className="text-right"
+                                                            >
+                                                                {match.homeTeam.name}
+                                                            </div>
+                                                            <div 
+                                                                className="col-span-3 text-center font-semibold font-[family-name:var(--font-serif)] text-sm"
+                                                            >
+                                                                {match.homeTeam.venue?.name ?? "TBD"}
+                                                                <p className="text-[var(--text-muted)] text-xs font-[family-name:var(--font-sans)]">
+                                                                    {new Date(String(match.scheduledAt)).toLocaleDateString("en-US", {
+                                                                        weekday: "short",
+                                                                        month: "short",
+                                                                        day: "numeric",
+                                                                        timeZone: "UTC",
+                                                                    })}
+                                                                </p>
+                                                            </div>
+                                                        </Link>
+                                                    )
+                                                })
                                             
-                                            upcomingMatches.map((match) => {
-                                                return (
-                                                    <div 
-                                                        key={match.id}
-                                                        className="grid grid-cols-3 gap-4"    
-                                                    >
-                                                        <div>{match.homeTeam}</div>
-                                                        <div>{match.awayTeam}</div>
-                                                        <div>{match.venue}</div>
-                                                    </div>
-                                                )
-                                            })
-                                        
-                                        ) : (
-                                            <p className="text-[var(--text-muted)]">
-                                                No upcoming matches scheduled
-                                            </p>
-                                        )}
-
+                                            ) : (
+                                                <p className="text-[var(--text-muted)]">
+                                                    No upcoming matches scheduled
+                                                </p>
+                                            )}
+                                        </div>
 
                                     </div>
                                     <div className="rounded-lg border border-[var(--surface-alt)] p-6">
-                                        <h3 className="font-[family-name:var(--font-display)] text-xl uppercase">
+                                        <h3 className="font-[family-name:var(--font-display)] text-xl uppercase text-[var(--accent)]">
                                             Recent Results
                                         </h3>
-                                        {completedMatches.length > 0 ? (
+                                        <div className="divide-y divide-[var(--surface-alt)]">
+                                            {completedMatches.length > 0 ? (
 
-                                            completedMatches.map((match) => {
-                                                return (
-                                                    <div key={match.id}
-                                                        className="grid grid-cols-3 gap-4"
-                                                    >
-                                                        <div>{match.homeTeam}</div>
-                                                        <div className="font-[family-name:var(--font-mono)]">{match.homeScore} - {match.awayScore}</div>
-                                                        <div>{match.awayTeam}</div>
-                                                    </div>
-                                                )
-                                            })
+                                                completedMatches.map((match) => {
+                                                    return (
+                                                        <div key={match.id}
+                                                            className="grid grid-cols-3 gap-4 py-4"
+                                                        >
+                                                            <div>{match.awayTeam.name}</div>
+                                                            <div 
+                                                                className="font-[family-name:var(--font-mono)] text-center"
+                                                            >
+                                                                {match.awayScore} - {match.homeScore}
+                                                            </div>
+                                                            <div
+                                                                className="text-right"
+                                                            >
+                                                                {match.homeTeam.name}
+                                                            </div>
+                                                            <div 
+                                                                className="col-span-3 text-center font-semibold font-[family-name:var(--font-serif)] text-sm"
+                                                            >
+                                                                {match.homeTeam.venue?.name ?? "TBD"}
+                                                                <p className="text-[var(--text-muted)] text-xs font-[family-name:var(--font-sans)]">
+                                                                    {new Date(String(match.scheduledAt)).toLocaleDateString("en-US", {
+                                                                        weekday: "short",
+                                                                        month: "short",
+                                                                        day: "numeric",
+                                                                        timeZone: "UTC",
+                                                                    })}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })
 
-                                        ) : (
-                                            <p className="text-[var(--text-muted)]">
-                                                No recent results
-                                            </p>
-                                        )}
+                                            ) : (
+                                                <p className="text-[var(--text-muted)]">
+                                                    No recent results
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             );

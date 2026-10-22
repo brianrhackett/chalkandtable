@@ -4,6 +4,8 @@ import { auth } from "@/auth";
 import { db } from "@/src/prisma/db";
 import { revalidatePath } from "next/cache";
 
+import { getLeaguePermissions } from "@/src/lib/leagues/getLeaguePermissions";
+
 type RackResult = {
     rackNumber: number;
     winnerTeamId: number;
@@ -23,31 +25,8 @@ export async function saveRackResults(
         };
     }
 
-    const user = await db.orm.public.User.first({
-        email: session.user.email,
-    });
+    
 
-    if (!user) {
-        return {
-            success: false,
-            error: "Unauthorized.",
-        };
-    }
-
-    const membership = await db.orm.public.LeagueUser
-        .where({
-            userId: user.id,
-            leagueId,
-        })
-        .include("league")
-        .first();
-
-    if (!membership) {
-        return {
-            success: false,
-            error: "You do not have access to this league.",
-        };
-    }
 
     const match = await db.orm.public.Match
         .where({
@@ -59,6 +38,42 @@ export async function saveRackResults(
         return {
             success: false,
             error: "Match not found.",
+        };
+    }
+
+    const season = await db.orm.public.Season.first({
+        id: match.seasonId,
+        leagueId,
+    });
+
+    if (!season) {
+        return {
+            success: false,
+            error: "Match does not belong to this league.",
+        };
+    }
+
+    if (!season.active) {
+        return {
+            success: false,
+            error: "Rack results cannot be edited for historical seasons.",
+        };
+    }
+
+    const permissions = await getLeaguePermissions(
+        leagueId,
+        season.id
+    );
+
+    if (
+        !permissions.canManageMatch(
+            match.homeTeamId,
+            match.awayTeamId
+        )
+    ) {
+        return {
+            success: false,
+            error: "You do not have permission to manage rack results.",
         };
     }
 
@@ -105,9 +120,15 @@ export async function saveRackResults(
         });
     }
 
-    revalidatePath(
-        `/leagues/${membership.league.slug}/matches/${matchId}`
-    );
+    const league = await db.orm.public.League.first({
+        id: leagueId,
+    });
+
+    if(league) {
+        revalidatePath(
+            `/leagues/${league.slug}/matches/${matchId}`
+        );
+    }
 
     return {
         success: true,

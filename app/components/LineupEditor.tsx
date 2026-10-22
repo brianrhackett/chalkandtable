@@ -25,6 +25,7 @@ type LineupEditorProps = {
     match: Match;
     roster: RosterPlayer[];
     existingLineup: MatchLineupPlayer[];
+    canEditLineup: boolean;
 };
 
 export default function LineupEditor({
@@ -33,6 +34,7 @@ export default function LineupEditor({
     match,
     roster,
     existingLineup,
+    canEditLineup,
 }: LineupEditorProps) {
     const [lineup, setLineup] = useState<(number | null)[]>(
         existingLineup.length > 0
@@ -133,6 +135,7 @@ export default function LineupEditor({
 
                             <select
                                 value={selectedPlayerId ?? ""}
+                                disabled={!canEditLineup || isPending}
                                 onChange={(event) =>
                                     selectPlayer(
                                         index,
@@ -167,7 +170,7 @@ export default function LineupEditor({
                                 })}
                             </select>
 
-                            {lineup.length > 1 && (
+                            {canEditLineup && lineup.length > 1 && (
                                 <button
                                     type="button"
                                     onClick={() => removePlayer(index)}
@@ -179,17 +182,19 @@ export default function LineupEditor({
                         </div>
                     ))}
                 </div>
-
-                <div className="mt-6">
-                    <button
-                        type="button"
-                        onClick={addPlayer}
-                        disabled={lineup.length >= roster.length}
-                        className="mt-4 font-sans text-sm font-semibold text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                        + Add Player
-                    </button>
-                </div>
+                
+                {canEditLineup && (
+                    <div className="mt-6">    
+                        <button
+                            type="button"
+                            onClick={addPlayer}
+                            disabled={lineup.length >= roster.length}
+                            className="mt-4 font-sans text-sm font-semibold text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            + Add Player
+                        </button>
+                    </div>
+                )}
             </div>
 
             {error && (
@@ -204,23 +209,25 @@ export default function LineupEditor({
                 </p>
             )}
             
-            <div className="mt-8 flex items-center gap-3">
-                <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={isPending}
-                    className="btn-primary"
-                >
-                    {isPending ? "Saving..." : "Save Lineup"}
-                </button>
+            {canEditLineup && (
+                <div className="mt-8 flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={isPending}
+                        className="btn-primary"
+                    >
+                        {isPending ? "Saving..." : "Save Lineup"}
+                    </button>
 
-                <Link
-                    href={`/leagues/${league.slug}/schedule`}
-                    className="btn-secondary"
-                >
-                    Cancel
-                </Link>
-            </div>
+                    <Link
+                        href={`/leagues/${league.slug}/schedule`}
+                        className="btn-secondary"
+                    >
+                        Cancel
+                    </Link>
+                </div>
+            )}
         </div>
     );
 }
