@@ -83,7 +83,7 @@ export default async function DashboardPage() {
         <>
             <Header />
             <main className="p-8 w-7xl max-w-full m-auto">
-                <section className="flex items-start justify-between gap-8">
+                <section className="flex items-start justify-between gap-8 flex-col sm:flex-row">
                     <div>
                         <h1 className="font-[family-name:var(--font-display)] text-5xl uppercase">
                             Welcome back, {session.user.name}.

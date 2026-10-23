@@ -79,7 +79,7 @@ export default async function SchedulePage({
 
 	return (
 		<main className="mx-auto w-full max-w-7xl px-6 py-12">
-			<div className="flex items-center justify-between py-4 first:pt-0">
+			<div className="flex justify-between py-4 first:pt-0 flex-col gap-6 sm:flex-row sm:items-center">
 				<div>
 					<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-xl font-semibold sm:text-2xl">
 						League Schedule
@@ -194,7 +194,7 @@ export default async function SchedulePage({
 
 											<Link
 												href={teamUrl(match.awayTeam.slug)}
-												className="text-right font-[family-name:var(--font-serif)] text-lg font-semibold hover:text-[var(--accent)]"
+												className="text-right sm:text-lg font-semibold hover:text-[var(--accent)]"
 											>
 												{match.awayTeam.name}
 											</Link>
@@ -202,7 +202,7 @@ export default async function SchedulePage({
 
 										<div className="min-w-16 text-center">
 											{match.status === "completed" ? (
-												<p className="bg-[var(--accent)] rounded-lg px-4 py-2 text-[var(--surface)] font-[family-name:var(--font-mono)] text-lg font-semibold">
+												<p className="bg-[var(--accent)] rounded-md px-2 py-1 sm:px-4 sm:py-2 text-[var(--surface)] font-[family-name:var(--font-mono)] sm:text-lg font-semibold">
 													{match.awayScore}
 													&nbsp;&ndash;&nbsp;
 													{match.homeScore}
@@ -215,10 +215,10 @@ export default async function SchedulePage({
 
 										</div>
 
-										<div className="flex items-center gap-2">
+										<div className="flex items-center gap-2 flex-col sm:flex-row">
 											<Link
 												href={teamUrl(match.homeTeam.slug)}
-												className="font-[family-name:var(--font-serif)] text-lg font-semibold hover:text-[var(--accent)]"
+												className="sm:text-lg font-semibold hover:text-[var(--accent)] order-2 sm:order-1"
 											>
 												{match.homeTeam.name}
 											</Link>
@@ -230,7 +230,7 @@ export default async function SchedulePage({
 												) && (
 												<Link
 													href={`/leagues/${league.slug}/matches/${match.id}/lineup/${match.homeTeam.id}`}
-													className="text-xs font-sans font-semibold text-[var(--accent)] hover:text-[var(--accent-strong)]"
+													className="text-xs font-sans font-semibold text-[var(--accent)] hover:text-[var(--accent-strong)] order-1 sm:order-2"
 													title="Lineup"
 												>
 													<ListOrdered

@@ -119,7 +119,7 @@ export default function RackEditor({
                 {racks.map((rack) => (
                     <div
                         key={rack.rackNumber}
-                        className="grid grid-cols-[80px_1fr_1fr_80px] items-center gap-3"
+                        className="grid grid-cols-3 sm:grid-cols-[80px_1fr_1fr_80px] items-center gap-3"
                     >
                         <div className="font-sans text-sm font-semibold text-[var(--text-muted)]">
                             Rack {rack.rackNumber}

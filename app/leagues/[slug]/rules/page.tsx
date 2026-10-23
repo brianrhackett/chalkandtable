@@ -32,9 +32,9 @@ export default async function RulesPage({
 
 	return (
 		<main className="mx-auto w-full max-w-7xl px-6 py-12">
-			<div className="flex items-center justify-between py-4 first:pt-0">
+			<div className="flex justify-between py-8 first:pt-0 flex-col gap-6 sm:flex-row sm:items-center">
 				<div>
-					<div className="mb-8">
+					<div className="">
 						<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-xl font-semibold sm:text-2xl">
 							League Rules
 						</h1>

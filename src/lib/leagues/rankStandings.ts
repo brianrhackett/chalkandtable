@@ -172,6 +172,5 @@ export function rankStandings(
 		}
 	}
 
-	console.log(ranked)
 	return ranked;
 }

@@ -126,27 +126,28 @@ export default async function TeamPage({
 			</Link>
 
 			<div className="mt-8 border-b border-[var(--surface-alt)] pb-8">
-				<div className="flex items-center justify-between py-4 first:pt-0">
+				<div className="flex justify-between py-4 first:pt-0 flex-col gap-6 sm:flex-row sm:items-center">
 					<div>
-					<p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">
-						Team
-					</p>
+						<p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">
+							Team
+						</p>
 
-					<h1 className="mt-2 font-[family-name:var(--font-serif)] text-5xl font-semibold">
-						{team.name}
-					</h1>
+						<h1 className="mt-2 font-[family-name:var(--font-serif)] text-5xl font-semibold">
+							{team.name}
+						</h1>
+					</div>
+					<div>
+						{venue && (
+							<div className="mt-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+								<MapPin
+									size={16}
+									strokeWidth={1.75}
+									className="text-[var(--accent)]"
+								/>
 
-					{venue && (
-						<div className="mt-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
-							<MapPin
-								size={16}
-								strokeWidth={1.75}
-								className="text-[var(--accent)]"
-							/>
-
-							<span>{venue.name}</span>
-						</div>
-					)}
+								<span>{venue.name}</span>
+							</div>
+						)}
 					</div>
 				
 					<div>
@@ -170,8 +171,8 @@ export default async function TeamPage({
 
 			{season && record && (
 				<>
-					<div className="grid border-b border-[var(--surface-alt)] sm:grid-cols-4">
-						<div className="py-6 sm:border-r sm:border-[var(--surface-alt)]">
+					<div className="grid border-b border-[var(--surface-alt)] grid-cols-3 sm:grid-cols-4">
+						<div className="py-6 sm:border-r sm:border-[var(--surface-alt)] col-span-3 sm:col-span-1">
 							<p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
 								Record
 							</p>
@@ -422,9 +423,13 @@ export default async function TeamPage({
 
 												{seasonTeam.playerStatsEnabled && player.stats && (
 													<>
-														<td className="px-3 py-3 text-center tabular-nums">{player.stats.wins}</td>
-														<td className="px-3 py-3 text-center tabular-nums">{player.stats.losses}</td>
-														<td className="px-4 py-3 text-right tabular-nums">
+														<td className="px-3 py-3 text-center tabular-nums font-[family-name:var(--font-mono)]">
+															{player.stats.wins}
+														</td>
+														<td className="px-3 py-3 text-center tabular-nums font-[family-name:var(--font-mono)]">
+															{player.stats.losses}
+														</td>
+														<td className="px-4 py-3 text-right tabular-nums font-[family-name:var(--font-mono)]">
 															{(
 																player.stats.wins /
 																(player.stats.wins + player.stats.losses)

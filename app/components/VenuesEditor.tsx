@@ -125,7 +125,7 @@ export default function VenuesEditor({
                 {venues.map((venue) => (
                     <div 
                         key={venue.id}
-                        className="flex gap-4 items-center py-1 text-sm border-b-1 border-[var(--surface-alt)]"
+                        className="flex gap-2 lg:gap-4 py-4 lg:py-0 lg:items-center py-1 text-sm border-b-1 border-[var(--surface-alt)] flex-col lg:flex-row"
                     >
                         <div className="min-w-0 flex-1 font-semibold">
                             {venue.name}

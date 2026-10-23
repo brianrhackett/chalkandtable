@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/src/prisma/db";
 import { Temporal } from "@js-temporal/polyfill";
 import { formatMatchDate } from "@/src/lib/formatMatchDate.ts";
+import { getLeagueStandings } from "@/src/lib/leagues/getLeagueStandings";
 
 type LeagueHomeProps = {
     league: {
@@ -67,13 +68,15 @@ export default async function LeagueHome({
 
     const latestResults = completedMatches.slice(0, 5);
 
+	const standings = await getLeagueStandings(league.slug, season.slug);
+	const top4 = standings.standings.slice(0, 4);
 
     return (
         <main className="mx-auto w-full max-w-7xl px-6 py-12">
 			<section>
 				<div className="flex items-end justify-between gap-6">
 					<div>
-						<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-2xl font-semibold">
+						<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-xl sm:text-2xl font-semibold">
 							Next Matches
 						</h1>
 					</div>
@@ -132,10 +135,63 @@ export default async function LeagueHome({
 							Full standings &rarr;
 						</Link>
 					</div>
+					<div className="mt-5 overflow-hidden">
+						<div className="overflow-x-auto">
+							<table className="w-full border-collapse">
+								<thead>
+									<tr className="border-b border-[var(--surface-alt)]">
+										<th className="sticky left-0 z-20 pr-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] sm:static">
+											Team
+										</th>
 
-					<p className="mt-6 text-[var(--text-muted)]">
-						{seasonTeams.length} teams competing this season.
-					</p>
+										<th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+											W
+										</th>
+
+										<th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+											L
+										</th>
+
+										<th className="pl-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+											PCT
+										</th>
+									</tr>
+								</thead>
+
+								<tbody className="divide-y divide-[var(--surface-alt)]">
+									{top4.map((team, index) => (
+										<tr
+											key={team.teamId}
+											className="transition-colors hover:bg-[var(--surface-alt)]"												
+										>
+											<td className="sticky left-0 z-10 min-w-30 bg-[var(--surface)] pr-5 py-5 sm:static sm:bg-transparent">
+												<Link
+													href={`/leagues/${league.slug}/teams/${team.slug}`}
+													className="text-lg font-semibold transition-colors hover:text-[var(--accent)]"
+												>
+													{team.name}
+												</Link>
+											</td>
+
+											<td className="px-4 py-5 text-center font-[family-name:var(--font-mono)] text-sm font-semibold">
+												{team.wins}
+											</td>
+
+											<td className="px-4 py-5 text-center font-[family-name:var(--font-mono)] text-sm">
+												{team.losses}
+											</td>
+
+											<td className="pl-4 py-5 text-center font-[family-name:var(--font-mono)] text-sm font-semibold">
+												{team.matchPercentage
+													.toFixed(3)
+													.replace(/^0/, "")}
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</section>
 
 				<section className="rounded-md border border-[var(--surface-alt)] bg-[var(--surface)] p-6">
@@ -180,16 +236,6 @@ export default async function LeagueHome({
 					</div>
 				</section>
 			</div>
-
-			<section className="mt-12 border-t border-[var(--surface-alt)] py-8 text-center">
-				<p className="font-[family-name:var(--font-serif)] text-xl">
-					{season.name}
-				</p>
-
-				<p className="mt-2 text-sm text-[var(--text-muted)]">
-					{seasonTeams.length} Teams
-				</p>
-			</section>
 		</main>
     )
 }

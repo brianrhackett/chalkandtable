@@ -58,7 +58,7 @@ export default async function StandingsPage({
 
 	return (
 		<main className="mx-auto w-full max-w-7xl px-6 py-12">
-			<div className="flex items-center justify-between py-4 first:pt-0">
+			<div className="flex justify-between py-4 first:pt-0 flex-col gap-6 sm:flex-row sm:items-center">
 				<div>
 					<h1 className="mt-2 font-[family-name:var(--font-serif)] text-[var(--accent)] text-xl font-semibold sm:text-2xl">
 						League Standings
@@ -153,7 +153,7 @@ export default async function StandingsPage({
 										{team.rank}
 									</td>
 
-									<td className="sticky left-0 z-10 min-w-40 bg-[var(--surface)] px-5 py-5 sm:static sm:bg-transparent">
+									<td className="sticky left-0 z-10 min-w-30 bg-[var(--surface)] px-5 py-5 sm:static sm:bg-transparent">
 										<Link
 											href={`/leagues/${league.slug}/teams/${team.slug}`}
 											className="text-lg font-semibold transition-colors hover:text-[var(--accent)]"

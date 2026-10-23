@@ -136,12 +136,12 @@ export default function TeamsEditor({
                     return (
                         <div 
                             key={team.id}
-                            className="flex gap-4 items-center flex-row py-1 text-sm border-b-1 border-[var(--surface-alt)]"
+                            className="flex gap-2 lg:gap-4 py-4 lg:py-0 lg:items-center py-1 text-sm border-b-1 border-[var(--surface-alt)] flex-col lg:flex-row"
                         >
                             <div className="min-w-0 flex-1 font-semibold">
                                 {team.name}
                             </div>
-                            <div className="w-40 shrink-0 text-[var(--text-muted)]">
+                            <div className="lg:w-40 shrink-0 text-[var(--text-muted)]">
                                 {venue.name}
                             </div>
                             <div className="flex shrink-0 gap-2">

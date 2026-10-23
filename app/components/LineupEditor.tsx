@@ -113,7 +113,7 @@ export default function LineupEditor({
     return (
         <div className="p-6">
             <div className="mb-6">
-                <h2 className="font-[family-name:var(--font-serif)] text-2xl font-bold">
+                <h2 className="font-[family-name:var(--font-serif)] text-xl sm:text-2xl font-bold">
                     {team.name} Lineup
                 </h2>
 

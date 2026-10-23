@@ -147,8 +147,8 @@ export default function LeagueSettingsForm({
                             </p>
                         </div>
                     </div>
-                    <div className="mt-4 grid grid-cols-1 gap-5">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="mt-4 grid grid-cols-1">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                             <div className="p-4 rounded-lg border border-[var(--surface-alt)] bg-[var(--background)]">
                                 <VenuesEditor
                                     leagueId={league.id}

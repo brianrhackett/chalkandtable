@@ -65,8 +65,8 @@ export default function Home() {
 	return (
 		<>
 		<Header />
-			<main>
-				<section className="py-24 mx-auto max-w-5xl">
+			<main className="px-6">
+				<section className="py-16 sm:py-24 mx-auto max-w-5xl">
 					<h2 className="font-[family-name:var(--font-display)] text-8xl">
 						Run Your League, 
 						<span className="block text-[var(--accent)]">Not a Spreadsheet</span>
@@ -118,13 +118,15 @@ export default function Home() {
 						<div className="font-[family-name:var(--font-mono)] text-center mb-8">
 							Week 4 &sdot; Thursday, Oct 22
 						</div>
-						{matches.map((match) => (
-							<div key="{match.id}" className="grid grid-cols-3 border-b border-white/10 py-4">
-								<span>{match.homeTeam}</span>
-								<span className="text-center"> vs </span>
-								<span className="text-right">{match.awayTeam}</span>
-							</div>
-						))}
+						<div className="divide-y divide-[var(--surface-alt)]">
+							{matches.map((match) => (
+								<div key="{match.id}" className="grid grid-cols-3 py-4">
+									<span>{match.homeTeam}</span>
+									<span className="text-center"> vs </span>
+									<span className="text-right">{match.awayTeam}</span>
+								</div>
+							))}
+						</div>
 					</div>
 					<div>
 						<h3 className="font-[family-name:var(--font-display)] text-6xl">

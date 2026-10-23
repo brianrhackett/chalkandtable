@@ -76,7 +76,7 @@ export default async function LineupPage({
                             Week {match.week}
                         </p>
 
-                        <h1 className="font-[family-name:var(--font-serif)] text-3xl font-bold">
+                        <h1 className="font-[family-name:var(--font-serif)] text-2xl sm:text-3xl font-bold">
                             {awayTeam.name}
                             <span className="mx-4 font-sans text-xl font-normal text-[var(--text-muted)]">
                                 @
