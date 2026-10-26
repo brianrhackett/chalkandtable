@@ -25,7 +25,7 @@ model Season {
   id              Int                        @id @default(autoincrement())
   leagueId        Int
   name            String
-  slug            String?
+  slug            String
   rules           String?
   theme           String?
   startDate       DateTime?
@@ -43,7 +43,7 @@ model Season {
   playoffSeries   PlayoffSeries[]
 
   @@unique([leagueId, name])
-  //@@unique([leagueId, slug])
+  @@unique([leagueId, slug])
   @@map("seasons")
 }
 

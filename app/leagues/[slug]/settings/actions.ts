@@ -85,13 +85,16 @@ export async function updateLeagueSettings(
         };
     }
 
-    await db.orm.public.League.update({
-        id: leagueId,
-        name,
-        slug,
-        theme: theme as ThemeKey,
-        playerStatsEnabled,
-    });
+    await db.orm.public.League
+		.where({
+			id: leagueId,
+		})
+		.update({
+			name,
+			slug,
+			theme: theme as ThemeKey,
+			playerStatsEnabled,
+		});
 
     revalidatePath("/dashboard");
     revalidatePath(`/leagues/${slug}`);
@@ -177,10 +180,13 @@ export async function updateSeasonRules(
 		allowedAttributes: {},
 	});
 
-	await db.orm.public.Season.update({
-		id: seasonId,
-		rules: sanitizedRules,
-	});
+	await db.orm.public.Season
+		.where({
+			id: seasonId,
+		})
+		.update({
+			rules: sanitizedRules,
+		});
 
 	const league = await db.orm.public.League.first({
 		id: season.leagueId,
@@ -906,11 +912,15 @@ export async function savePlayoffConfiguration(
 	let playoff;
 
 	if (existingPlayoff) {
-		playoff = await db.orm.public.Playoff.update({
-			id: existingPlayoff.id,
-			teamCount: configuration.teamCount,
-			reseed: configuration.reseed,
-		});
+		playoff = await db.orm.public.Playoff
+			.where({
+				id: existingPlayoff.id,
+			})
+			.update({
+				
+				teamCount: configuration.teamCount,
+				reseed: configuration.reseed,
+			});
 
 		const existingRounds =
 			await db.orm.public.PlayoffRoundConfig
@@ -920,9 +930,9 @@ export async function savePlayoffConfiguration(
 				.all();
 
 		for (const round of existingRounds) {
-			await db.orm.public.PlayoffRoundConfig.delete({
+			await db.orm.public.PlayoffRoundConfig.where({
 				id: round.id,
-			});
+			}).delete();
 		}
 	} else {
 		playoff = await db.orm.public.Playoff.create({
@@ -941,10 +951,13 @@ export async function savePlayoffConfiguration(
         });
     }
 
-	await db.orm.public.Season.update({
-		id: seasonId,
-		playoffsEnabled: true,
-	});
+	await db.orm.public.Season
+		.where({
+			id: seasonId,
+		})
+		.update({
+			playoffsEnabled: true,
+		});
 
     const league = await db.orm.public.League.first({
         id: leagueId,

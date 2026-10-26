@@ -187,6 +187,10 @@ body {
 	&:hover {
 		background-color: var(--accent-strong);
 	}
+
+	&:disabled {
+		opacity: 0.5;
+	}
 }
 
 @utility btn-secondary {
@@ -198,6 +202,10 @@ body {
 	&:hover {
 		background-color: var(--accent);
 		color: var(--background);
+	}
+
+	&:disabled {
+		opacity: 0.5;
 	}
 }
 
@@ -211,6 +219,10 @@ body {
 		background-color: var(--text);
 		color: var(--background);
 	}
+	
+	&:disabled {
+		opacity: 0.5;
+	}
 }
 
 @utility btn-danger-subtle {
@@ -220,6 +232,10 @@ body {
 
 	&:hover {
 		background-color: color-mix(in srgb, var(--danger) 12%, transparent);
+	}
+	
+	&:disabled {
+		opacity: 0.5;
 	}
 }
 
@@ -232,13 +248,17 @@ body {
 	&:hover {
 		opacity: 0.8;
 	}
+	
+	&:disabled {
+		opacity: 0.5;
+	}
 }
 
 @utility form-input {
 	@apply w-full rounded-md border px-3 py-2 outline-none transition-colors;
 
 	background-color: transparent;
-	border-color: color-mix(in srgb, var(--text-color) 25%, transparent);
+	border-color: var(--surface-alt);
 	color: var(--text-color);
 
 	&:focus {

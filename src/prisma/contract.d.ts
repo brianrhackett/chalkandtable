@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'e22e3f49b1f37ebdb9d1588670965c16b3ba5f353c842d922c5023705620f022'>;
+  StorageHashBase<'345d429dbdd21bba536a1c971a8e1b64315f20aab092878eabc577bc1ebc57b5'>;
 export type ExecutionHash =
   ExecutionHashBase<'9d5d4554df243c491a9cb4ae1e9a7a14a382c3aa870c13b8130ac4b7c942bf18'>;
 export type ProfileHash =
@@ -345,7 +345,7 @@ export type FieldOutputTypes = {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly leagueId: CodecTypes['pg/int4@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-      readonly slug: CodecTypes['pg/text@1']['output'] | null;
+      readonly slug: CodecTypes['pg/text@1']['output'];
       readonly rules: CodecTypes['pg/text@1']['output'] | null;
       readonly theme: CodecTypes['pg/text@1']['output'] | null;
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
@@ -494,7 +494,7 @@ export type FieldInputTypes = {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly leagueId: CodecTypes['pg/int4@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-      readonly slug: CodecTypes['pg/text@1']['input'] | null;
+      readonly slug: CodecTypes['pg/text@1']['input'];
       readonly rules: CodecTypes['pg/text@1']['input'] | null;
       readonly theme: CodecTypes['pg/text@1']['input'] | null;
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
@@ -656,7 +656,7 @@ export type StorageColumnTypes = {
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly playoffsEnabled: CodecTypes['pg/bool@1']['output'] | null;
       readonly rules: CodecTypes['pg/text@1']['output'] | null;
-      readonly slug: CodecTypes['pg/text@1']['output'] | null;
+      readonly slug: CodecTypes['pg/text@1']['output'];
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly theme: CodecTypes['pg/text@1']['output'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -805,7 +805,7 @@ export type StorageColumnInputTypes = {
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly playoffsEnabled: CodecTypes['pg/bool@1']['input'] | null;
       readonly rules: CodecTypes['pg/text@1']['input'] | null;
-      readonly slug: CodecTypes['pg/text@1']['input'] | null;
+      readonly slug: CodecTypes['pg/text@1']['input'];
       readonly startDate: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly theme: CodecTypes['pg/text@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -856,7 +856,7 @@ export namespace Models {
     id: CodecTypes['pg/int4@1']['output'];
     leagueId: CodecTypes['pg/int4@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
-    slug: CodecTypes['pg/text@1']['output'] | null;
+    slug: CodecTypes['pg/text@1']['output'];
     rules: CodecTypes['pg/text@1']['output'] | null;
     theme: CodecTypes['pg/text@1']['output'] | null;
     startDate: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
@@ -2205,7 +2205,7 @@ type ContractBase = Omit<
                 readonly slug: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
+                  readonly nullable: false;
                 };
                 readonly rules: {
                   readonly nativeType: 'text';
@@ -2263,7 +2263,10 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['leagueId', 'name'] }];
+              uniques: readonly [
+                { readonly columns: readonly ['leagueId', 'name'] },
+                { readonly columns: readonly ['leagueId', 'slug'] },
+              ];
               indexes: readonly [
                 {
                   readonly name: 'seasons_leagueId_idx_1296e985';
@@ -3483,7 +3486,7 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly slug: {
-                readonly nullable: true;
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly rules: {

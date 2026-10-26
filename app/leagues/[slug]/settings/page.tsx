@@ -32,26 +32,34 @@ export default async function SettingsPage({
 		redirect("/login");
 	}
 
-    const membership = await db.orm.public.LeagueUser
-		.where({
-			userId: user.id,
-		})
-		.include("league", (league) =>
-	    	league.include("seasons", (season) =>
+    const league = await db.orm.public.League
+        .include("seasons", (season) =>
                 season.include("seasonTeams", (seasonTeam) =>
                     seasonTeam.include("team")
                 )
                 .include("matches")
             )
-            .include("venues")
-        )
+        .include("venues")
+        .where({
+            slug,
+        })
+        .first();
+
+    if (!league) {
+        notFound();
+    }
+
+    const membership = await db.orm.public.LeagueUser
+		.where({
+			userId: user.id,
+            leagueId: league.id
+		})
 		.first();
 
-	if (!membership || membership.league.slug !== slug || !canManageLeague(membership.role)) {
+    if (!membership || !canManageLeague(membership.role)) {
 		notFound();
 	}
 
-    const league = membership.league;
     const activeSeason = league.seasons.find(
         (season) => season.active
     );
