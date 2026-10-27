@@ -97,14 +97,15 @@ model Player {
 }
 
 model SeasonTeam {
-  id                 Int               @id @default(autoincrement())
-  seasonId           Int
-  teamId             Int
-  createdAt          TimestamptzString @default(now())
-  playerStatsEnabled Boolean           @default(false)
+  id                  Int               @id @default(autoincrement())
+  seasonId            Int
+  teamId              Int
+  createdAt           TimestamptzString @default(now())
+  playerStatsEnabled  Boolean           @default(false)
+  finalRank           Int?
 
-  season             Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
-  team               Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
+  season              Season            @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+  team                Team              @relation(fields:[teamId], references:[id], onDelete: Cascade)
 
   @@unique([seasonId, teamId])
   @@map("season_teams")

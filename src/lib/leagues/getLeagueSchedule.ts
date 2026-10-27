@@ -21,14 +21,15 @@ export type ScheduleMatch = {
 };
 
 export type ScheduleWeek = {
-	week: number;
-	date: string;
-	matches: ScheduleMatch[];
-	byeTeam: {
-		id: number;
-		name: string;
-		slug: string;
-	} | null;
+    week: number | null;
+    round: string | null;
+    date: string;
+    matches: ScheduleMatch[];
+    byeTeam: {
+        id: number;
+        name: string;
+        slug: string;
+    } | null;
 };
 
 export type ScheduleView =
@@ -88,6 +89,17 @@ export async function getLeagueSchedule(
 		})
 		.all();
 
+	const playoffSeries = await db.orm.public.PlayoffSeries
+		.where({ seasonId: season.id })
+		.all();
+
+	const seriesById = new Map(
+		playoffSeries.map((series) => [
+			series.id,
+			series,
+		])
+	);
+
 	const activeTeamIds = new Set(
 		seasonTeams.map((seasonTeam) => seasonTeam.teamId)
 	);
@@ -113,38 +125,58 @@ export async function getLeagueSchedule(
 		])
 	);
 
-	const matchesByWeek = new Map<
-		number,
-		typeof matches
-	>();
+	type MatchGroup = {
+		week: number | null;
+		round: string | null;
+		dateKey: string;
+		matches: typeof matches;
+	};
+
+	const matchGroups = new Map<string, MatchGroup>();
+
+	const dateFormatter = new Intl.DateTimeFormat("en-CA", {
+		timeZone: "America/New_York",
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	});
 
 	for (const match of matches) {
-		const weekMatches =
-			matchesByWeek.get(match.week) ?? [];
+		const round = match.playoffSeriesId
+			? String(
+				seriesById.get(match.playoffSeriesId)?.round ?? ""
+			)
+			: null;
 
-		weekMatches.push(match);
-
-		matchesByWeek.set(
-			match.week,
-			weekMatches
+		const dateKey = dateFormatter.format(
+			new Date(String(match.scheduledAt))
 		);
+
+		const key = match.week === null
+			? `playoff-${round}-${dateKey}`
+			: `week-${match.week}`;
+
+		if (!matchGroups.has(key)) {
+			matchGroups.set(key, {
+				week: match.week,
+				round,
+				dateKey,
+				matches: [],
+			});
+		}
+
+		matchGroups.get(key)!.matches.push(match);
 	}
 
 	const weeks: ScheduleWeek[] = [];
 
-	for (const [week, weekMatches] of matchesByWeek) {
+	for (const group of matchGroups.values()) {
 		const participatingTeamIds = new Set<number>();
-
 		const formattedMatches: ScheduleMatch[] = [];
 
-		for (const match of weekMatches) {
-			const homeTeam = teamsById.get(
-				match.homeTeamId
-			);
-
-			const awayTeam = teamsById.get(
-				match.awayTeamId
-			);
+		for (const match of group.matches) {
+			const homeTeam = teamsById.get(match.homeTeamId);
+			const awayTeam = teamsById.get(match.awayTeamId);
 
 			if (!homeTeam || !awayTeam) {
 				continue;
@@ -167,24 +199,27 @@ export async function getLeagueSchedule(
 					slug: awayTeam.slug,
 					playerStatsEnabled: awayTeam.playerStatsEnabled,
 				},
-				scheduledAt: match.scheduledAt,
+				scheduledAt: String(match.scheduledAt),
 				status: match.status,
 				homeScore: match.homeScore,
 				awayScore: match.awayScore,
 			});
 		}
 
-		const byeTeam =
-			activeTeams.find(
-				(team) =>
-					!participatingTeamIds.has(team.id)
-			) ?? null;
+		if (formattedMatches.length === 0) {
+			continue;
+		}
 
-		const firstMatch = weekMatches[0];
+		const byeTeam = group.week !== null
+			? activeTeams.find(
+				(team) => !participatingTeamIds.has(team.id)
+			) ?? null
+			: null;
 
 		weeks.push({
-			week,
-			date: firstMatch.scheduledAt,
+			week: group.week,
+			round: group.round,
+			date: String(group.matches[0].scheduledAt),
 			matches: formattedMatches,
 			byeTeam: byeTeam
 				? {
@@ -196,7 +231,10 @@ export async function getLeagueSchedule(
 		});
 	}
 	
-	weeks.sort((a, b) => a.week - b.week);
+	weeks.sort(
+		(a, b) =>
+			Temporal.Instant.compare(a.date, b.date)
+	);
 
     let filteredWeeks = weeks;
 

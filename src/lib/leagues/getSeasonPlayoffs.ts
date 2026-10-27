@@ -5,6 +5,7 @@ export type PlayoffMatch = {
     seriesMatch: number | null;
     homeTeamId: number;
     awayTeamId: number;
+    scheduledAt: string;
     homeScore: number | null;
     awayScore: number | null;
     status: string;
@@ -201,6 +202,7 @@ export async function getSeasonPlayoffs(
                 seriesMatch: match.seriesMatch,
                 homeTeamId: match.homeTeamId,
                 awayTeamId: match.awayTeamId,
+                scheduledAt: match.scheduledAt.toString(),
                 homeScore: match.homeScore,
                 awayScore: match.awayScore,
                 status: match.status,

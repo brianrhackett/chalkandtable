@@ -1,5 +1,6 @@
 import { db } from "@/src/prisma/db";
 import { rankStandings } from "./rankStandings";
+import { isRegularSeasonComplete } from "./isRegularSeasonComplete";
 
 export type LeagueStanding = {
 	teamId: number;
@@ -144,12 +145,15 @@ export async function getLeagueStandings(
 	    standings,
 	    matches
     );
+
+	const regularSeasonComplete = isRegularSeasonComplete(season.id);
 	
     return {
 		league,
 		season,
 		seasons,
 		standings: rankedStandings,
-		playoffTeamCount: playoffs?.teamCount ?? null
+		playoffTeamCount: playoffs?.teamCount ?? null,
+		regularSeasonComplete,
  	};
 }

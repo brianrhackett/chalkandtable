@@ -148,7 +148,11 @@ export default async function SchedulePage({
 							<div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--surface-alt)] bg-[var(--surface-alt)] px-6 py-4">
 								<div>
 									<p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
-										Week {week.week}
+										{week.week === null
+											? week.round === "Final"
+												? "Final"
+												: `${week.round}s`
+											: `Week ${week.week}`}
 									</p>
 
 									<h2 className="mt-1 font-[family-name:var(--font-serif)] text-2xl font-semibold">
@@ -156,7 +160,7 @@ export default async function SchedulePage({
 									</h2>
 								</div>
 
-								{week.byeTeam && (
+								{week.week !== null && week.byeTeam && (
 									<p className="text-sm text-[var(--text-muted)]">
 										Bye:{" "}
 										<Link

@@ -254,6 +254,10 @@ body {
 	}
 }
 
+@utility btn-muted {
+	@apply rounded px-4 py-2 text-sm text-[var(--text-muted)] cursor-pointer;
+}
+
 @utility form-input {
 	@apply w-full rounded-md border px-3 py-2 outline-none transition-colors;
 

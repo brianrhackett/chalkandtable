@@ -7,7 +7,7 @@ export function formatMatchDate(
 			weekday: "long",
 			month: "short",
 			day: "numeric",
-			timeZone: "UTC",
+			timeZone: "America/New_York",
 		}
 	);
 }

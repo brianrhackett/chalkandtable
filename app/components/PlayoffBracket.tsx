@@ -5,14 +5,20 @@ import type {
     SeasonPlayoffSeries,
 } from "@/lib/leagues/getSeasonPlayoffs";
 
+import SchedulePlayoffSeries from "./SchedulePlayoffSeries";
+
 type PlayoffBracketProps = {
     playoffs: SeasonPlayoffs;
     leagueSlug: string;
+    leagueId: number;
+    canManagePlayoffs: boolean;
 };
 
 export default function PlayoffBracket({
     playoffs,
     leagueSlug,
+    leagueId,
+    canManagePlayoffs,
 }: PlayoffBracketProps) {
     if (!playoffs.started) {
         return null;
@@ -52,6 +58,8 @@ export default function PlayoffBracket({
                                         key={series.id}
                                         series={series}
                                         leagueSlug={leagueSlug}
+                                        leagueId={leagueId}
+                                        canManagePlayoffs={canManagePlayoffs}
                                     />
                                 ))}
                             </div>
@@ -66,9 +74,13 @@ export default function PlayoffBracket({
 function SeriesCard({
     series,
     leagueSlug,
+    leagueId,
+    canManagePlayoffs,
 }: {
     series: SeasonPlayoffSeries;
     leagueSlug: string;
+    leagueId: number;
+    canManagePlayoffs: boolean;
 }) {
     const higherSeedScores = series.matches.map((match) => {
         if (
@@ -127,6 +139,15 @@ function SeriesCard({
                 }
                 leagueSlug={leagueSlug}
             />
+
+            {series.winnerTeamId === null && canManagePlayoffs && (
+                <div className="border-t border-[var(--surface-alt)] px-4 py-3">
+                    <SchedulePlayoffSeries
+                        leagueId={leagueId}
+                        series={series}
+                    />
+                </div>
+            )}
         </div>
     );
 }

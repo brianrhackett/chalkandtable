@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
+import { db } from "@/src/prisma/db";
 
 import { getLeagueStandings } from "@/src/lib/leagues/getLeagueStandings";
 import { getSeasonPlayoffs } from "@/src/lib/leagues/getSeasonPlayoffs";
+import { canManageLeague } from "@/src/lib/permissions/league";
 import SeasonSelect from "@/app/components/SeasonSelect";
 import PlayoffBracket from "@/app/components/PlayoffBracket";
+import StartPlayoffsButton from "@/app/components/StartPlayoffsButton";
+
+import { Trophy } from "lucide-react";
 
 type StandingsPageProps = {
 	params: Promise<{
@@ -19,6 +25,12 @@ export default async function StandingsPage({
 	params,
 	searchParams,
 }: StandingsPageProps) {
+	const session = await auth();
+
+    const user = await db.orm.public.User.first({
+		email: session.user.email,
+	});
+
 	const { slug } = await params;
 	const { season: seasonSlug } = await searchParams;
 
@@ -34,9 +46,17 @@ export default async function StandingsPage({
 		seasons,
 		standings,
 		playoffTeamCount,
+		regularSeasonComplete,
 	} = data;
 
 	const playoffs = await getSeasonPlayoffs(season.id);
+	console.log(playoffs);
+	const membership = await db.orm.public.LeagueUser
+		.where({
+			userId: user.id,
+            leagueId: league.id
+		})
+		.first();
 
 	if (!season) {
 		return (
@@ -86,10 +106,62 @@ export default async function StandingsPage({
 				</div>
 			</div>
 
+			{!playoffs.started && regularSeasonComplete && canManageLeague(membership.role) && (
+				<StartPlayoffsButton
+				    leagueId={league.id}
+					seasonId={season.id}
+					teamCount={playoffTeamCount}
+					teams={standings.map((standing) => ({
+						id: standing.teamId,
+						name: standing.name,
+						wins: standing.wins,
+						losses: standing.losses,
+					}))}
+				/>
+			)}
+
+			{playoffs.championTeamId !== null && (() => {
+				const champion = playoffs.rounds
+					.flatMap((round) => round.series)
+					.flatMap((series) => [
+						series.higherSeed,
+						series.lowerSeed,
+					])
+					.find((team) =>
+						team.teamId === playoffs.championTeamId
+					);
+
+				if (!champion) return null;
+
+				return (
+					<div className="my-8 rounded-lg border border-[var(--accent)] bg-[var(--surface-alt)] px-6 py-8 text-center">
+						<div className="mb-3 text-[var(--accent)] text-center">
+							<Trophy 
+								className="inline size-12"
+							/>
+						</div>
+
+						<div className="mb-2 text-sm font-semibold uppercase tracking-widest text-[var(--accent)]">
+							League Champions
+						</div>
+
+						<h3 className="text-3xl font-bold text-[var(--text)]">
+							{champion.name}
+						</h3>
+
+						<p className="mt-2 text-sm text-[var(--text-muted)]">
+							Congratulations on winning the championship!
+						</p>
+					</div>
+				);
+			})()}
+
 			{playoffs.started && (
 				<PlayoffBracket 
 					playoffs={playoffs}
 			        leagueSlug={league.slug}
+					leagueId={league.id}
+					canManagePlayoffs={canManageLeague(membership.role)}
 				/>
 			)}
 

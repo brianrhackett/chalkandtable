@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'345d429dbdd21bba536a1c971a8e1b64315f20aab092878eabc577bc1ebc57b5'>;
+  StorageHashBase<'b83628187de11b6f0b3797a69cf9137d957e7cdb3bec0f45151d76f083266034'>;
 export type ExecutionHash =
   ExecutionHashBase<'9d5d4554df243c491a9cb4ae1e9a7a14a382c3aa870c13b8130ac4b7c942bf18'>;
 export type ProfileHash =
@@ -362,6 +362,7 @@ export type FieldOutputTypes = {
       readonly teamId: CodecTypes['pg/int4@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly playerStatsEnabled: CodecTypes['pg/bool@1']['output'];
+      readonly finalRank: CodecTypes['pg/int4@1']['output'] | null;
     };
     readonly Team: {
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -511,6 +512,7 @@ export type FieldInputTypes = {
       readonly teamId: CodecTypes['pg/int4@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly playerStatsEnabled: CodecTypes['pg/bool@1']['input'];
+      readonly finalRank: CodecTypes['pg/int4@1']['input'] | null;
     };
     readonly Team: {
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -641,6 +643,7 @@ export type StorageColumnTypes = {
     };
     readonly season_teams: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly finalRank: CodecTypes['pg/int4@1']['output'] | null;
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly playerStatsEnabled: CodecTypes['pg/bool@1']['output'];
       readonly seasonId: CodecTypes['pg/int4@1']['output'];
@@ -790,6 +793,7 @@ export type StorageColumnInputTypes = {
     };
     readonly season_teams: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly finalRank: CodecTypes['pg/int4@1']['input'] | null;
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly playerStatsEnabled: CodecTypes['pg/bool@1']['input'];
       readonly seasonId: CodecTypes['pg/int4@1']['input'];
@@ -927,6 +931,7 @@ export namespace Models {
     teamId: CodecTypes['pg/int4@1']['output'];
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     playerStatsEnabled: CodecTypes['pg/bool@1']['output'];
+    finalRank: CodecTypes['pg/int4@1']['output'] | null;
     season: public_Season;
     team: public_Team;
     readonly [RelationKeys]?: 'season' | 'team';
@@ -2136,6 +2141,11 @@ type ContractBase = Omit<
                     readonly kind: 'literal';
                     readonly value: DefaultLiteralValue<'pg/bool@1', false>;
                   };
+                };
+                readonly finalRank: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
@@ -3641,6 +3651,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
               };
+              readonly finalRank: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
             };
             readonly relations: {
               readonly season: {
@@ -3674,6 +3688,7 @@ type ContractBase = Omit<
                 readonly teamId: { readonly column: 'teamId' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly playerStatsEnabled: { readonly column: 'playerStatsEnabled' };
+                readonly finalRank: { readonly column: 'finalRank' };
               };
             };
           };

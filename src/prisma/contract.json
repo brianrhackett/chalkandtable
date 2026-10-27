@@ -1829,6 +1829,13 @@
                   "kind": "scalar"
                 }
               },
+              "finalRank": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -1896,6 +1903,9 @@
               "fields": {
                 "createdAt": {
                   "column": "createdAt"
+                },
+                "finalRank": {
+                  "column": "finalRank"
                 },
                 "id": {
                   "column": "id"
@@ -3701,6 +3711,11 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "finalRank": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -4231,7 +4246,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "345d429dbdd21bba536a1c971a8e1b64315f20aab092878eabc577bc1ebc57b5"
+    "storageHash": "b83628187de11b6f0b3797a69cf9137d957e7cdb3bec0f45151d76f083266034"
   },
   "execution": {
     "executionHash": "9d5d4554df243c491a9cb4ae1e9a7a14a382c3aa870c13b8130ac4b7c942bf18",
