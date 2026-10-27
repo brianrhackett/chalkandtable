@@ -60,6 +60,12 @@ export default async function SettingsPage({
 		notFound();
 	}
 
+    const seasons = await db.orm.public.Season
+        .where({
+            leagueId: league.id,
+        })
+        .all();
+
     const activeSeason = league.seasons.find(
         (season) => season.active
     );
@@ -103,6 +109,7 @@ export default async function SettingsPage({
         <>
             
             <main className="mx-auto w-full max-w-7xl px-6 py-10">
+        
                 <h1 className="font-bold text-[var(--accent)] font-[family-name:var(--font-serif)] text-2xl">
                     League Settings
                 </h1>
@@ -129,6 +136,7 @@ export default async function SettingsPage({
                         playoff: playoffConfig,
                         playoffsEnabled: activeSeason.playoffsEnabled,
                     }}
+                    seasons={seasons}
                 />
                 
             </main>

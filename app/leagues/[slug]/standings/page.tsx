@@ -39,7 +39,7 @@ export default async function StandingsPage({
 	if (!data) {
 		notFound();
 	}
-
+	console.log(data);
 	const {
 		league,
 		season,
@@ -50,7 +50,7 @@ export default async function StandingsPage({
 	} = data;
 
 	const playoffs = await getSeasonPlayoffs(season.id);
-	console.log(playoffs);
+
 	const membership = await db.orm.public.LeagueUser
 		.where({
 			userId: user.id,

@@ -12,6 +12,7 @@ export async function isRegularSeasonComplete(
     const regularSeasonMatches = matches.filter(
         (match) => match.week !== null
     );
+	
 
     if (regularSeasonMatches.length === 0) {
         return false;

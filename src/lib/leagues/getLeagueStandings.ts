@@ -146,9 +146,9 @@ export async function getLeagueStandings(
 	    matches
     );
 
-	const regularSeasonComplete = isRegularSeasonComplete(season.id);
-	
-    return {
+	const regularSeasonComplete = await isRegularSeasonComplete(season.id);
+
+	return {
 		league,
 		season,
 		seasons,

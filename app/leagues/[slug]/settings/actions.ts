@@ -1049,3 +1049,337 @@ export async function disableSeasonPlayoffs(
         success: true,
     };
 }
+
+
+type CreateSeasonInput = {
+    name: string;
+    sourceSeasonId: number | null;
+    carryOver: {
+        teams: boolean;
+        rosters: boolean;
+        rules: boolean;
+        playoffs: boolean;
+    };
+};
+
+export async function createSeason(
+    leagueId: number,
+    input: CreateSeasonInput
+) {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+        return {
+            success: false,
+            error: "You must be signed in.",
+        };
+    }
+
+	const league = await db.orm.public.League.first({
+		id: leagueId,
+	});
+
+	if (!league) {
+		return {
+			success: false,
+			error: "League not found.",
+		};
+	}
+
+    const trimmedName = input.name.trim();
+
+    if (!trimmedName || trimmedName.length > 100) {
+        return {
+            success: false,
+            error: "Enter a valid season name.",
+        };
+    }
+
+    const generateSlug = (value: string) =>
+        value
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
+
+    const slug = generateSlug(trimmedName);
+
+    if (!slug) {
+        return {
+            success: false,
+            error: "Season name must contain letters or numbers.",
+        };
+    }
+
+    const user = await db.orm.public.User.first({
+        email: session.user.email,
+    });
+
+    if (!user) {
+        return {
+            success: false,
+            error: "User not found.",
+        };
+    }
+
+    const membership = await db.orm.public.LeagueUser.first({
+        userId: user.id,
+        leagueId,
+    });
+
+    if (
+        !membership ||
+        !["owner", "admin"].includes(membership.role)
+    ) {
+        return {
+            success: false,
+            error: "You do not have permission to create seasons.",
+        };
+    }
+
+    const existingSeason = await db.orm.public.Season.first({
+        leagueId,
+        slug,
+    });
+
+    if (existingSeason) {
+        return {
+            success: false,
+            error: "A season with this name already exists.",
+        };
+    }
+
+	const {
+		sourceSeasonId,
+		carryOver,
+	} = input;
+
+	if (carryOver.rosters && !carryOver.teams) {
+		return {
+			success: false,
+			error: "You must carry over teams to carry over rosters.",
+		};
+	}
+
+	const requiresSource = Object.values(carryOver).some(Boolean);
+
+	if (requiresSource && sourceSeasonId === null) {
+		return {
+			success: false,
+			error: "Select a season to copy settings from.",
+		};
+	}
+
+	let sourceSeason = null;
+
+	if (sourceSeasonId !== null) {
+		if (!Number.isInteger(sourceSeasonId) || sourceSeasonId <= 0) {
+			return {
+				success: false,
+				error: "Invalid source season.",
+			};
+		}
+
+		sourceSeason = await db.orm.public.Season.first({
+			id: sourceSeasonId,
+			leagueId,
+		});
+
+		if (!sourceSeason) {
+			return {
+				success: false,
+				error: "The selected source season does not belong to this league.",
+			};
+		}
+	}
+
+	try {
+		const seasonId = await db.transaction(async (tx) => {
+			const season = await tx.orm.public.Season.create({
+				leagueId,
+				name: trimmedName,
+				slug,
+				active: false,
+				matchFormat: carryOver.rules && sourceSeason
+					? sourceSeason.matchFormat
+					: "Doubles",
+				rules: carryOver.rules && sourceSeason
+					? sourceSeason.rules
+					: null,
+			});
+
+			if (carryOver.teams && sourceSeason) {
+				const sourceTeams = await tx.orm.public.SeasonTeam
+					.where({
+						seasonId: sourceSeason.id,
+					})
+					.all();
+
+				for (const sourceTeam of sourceTeams) {
+					await tx.orm.public.SeasonTeam.create({
+						seasonId: season.id,
+						teamId: sourceTeam.teamId,
+						playerStatsEnabled: sourceTeam.playerStatsEnabled,
+					});
+				}
+			}
+
+			if (carryOver.rosters && sourceSeason) {
+				const sourceRosters = await tx.orm.public.RosterPlayer
+					.where({
+						seasonId: sourceSeason.id,
+					})
+					.all();
+
+				for (const rosterPlayer of sourceRosters) {
+					await tx.orm.public.RosterPlayer.create({
+						seasonId: season.id,
+						teamId: rosterPlayer.teamId,
+						playerId: rosterPlayer.playerId,
+						active: rosterPlayer.active,
+						captainPosition: rosterPlayer.captainPosition,
+					});
+				}
+			}
+
+			if (carryOver.playoffs && sourceSeason) {
+				const sourcePlayoff = await tx.orm.public.Playoff.first({
+					seasonId: sourceSeason.id,
+				});
+
+				if (sourcePlayoff) {
+					const newPlayoff = await tx.orm.public.Playoff.create({
+						seasonId: season.id,
+						teamCount: sourcePlayoff.teamCount,
+						reseed: sourcePlayoff.reseed,
+					});
+
+					const sourceRounds = await tx.orm.public.PlayoffRoundConfig
+						.where({
+							playoffId: sourcePlayoff.id,
+						})
+						.all();
+
+					for (const round of sourceRounds) {
+						await tx.orm.public.PlayoffRoundConfig.create({
+							playoffId: newPlayoff.id,
+							round: round.round,
+							name: round.name,
+							bestOf: round.bestOf,
+						});
+					}
+				}
+			}
+
+			return season.id;
+		});
+
+		revalidatePath(`/leagues/${league.slug}/settings`);
+
+		return {
+			success: true,
+			seasonId,
+		};
+	} catch (error) {
+		console.error("Failed to create season:", error);
+
+		return {
+			success: false,
+			error: "Unable to create season.",
+		};
+	}
+}
+
+export async function activateSeason(
+    leagueId: number,
+    seasonId: number
+) {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+        return {
+            success: false,
+            error: "You must be signed in.",
+        };
+    }
+
+    const user = await db.orm.public.User.first({
+        email: session.user.email,
+    });
+
+    if (!user) {
+        return {
+            success: false,
+            error: "User not found.",
+        };
+    }
+
+    const membership = await db.orm.public.LeagueUser.first({
+        leagueId,
+        userId: user.id,
+    });
+
+    if (
+        !membership ||
+        !["owner", "admin"].includes(membership.role)
+    ) {
+        return {
+            success: false,
+            error: "You do not have permission to activate seasons.",
+        };
+    }
+
+    const season = await db.orm.public.Season.first({
+        id: seasonId,
+        leagueId,
+    });
+
+    if (!season) {
+        return {
+            success: false,
+            error: "Season not found.",
+        };
+    }
+
+    if (season.active) {
+        return {
+            success: true,
+        };
+    }
+
+    try {
+        await db.transaction(async (tx) => {
+            const seasons = await tx.orm.public.Season
+                .where({ leagueId })
+                .all();
+
+            for (const existingSeason of seasons) {
+                await tx.orm.public.Season
+                    .where({ id: existingSeason.id })
+                    .update({
+                        active: existingSeason.id === seasonId,
+                    });
+            }
+        });
+
+        const league = await db.orm.public.League.first({
+            id: leagueId,
+        });
+
+        if (league) {
+            revalidatePath(`/leagues/${league.slug}/settings`, "layout");
+        }
+
+        revalidatePath("/dashboard");
+
+        return {
+            success: true,
+        };
+    } catch (error) {
+        console.error("Failed to activate season:", error);
+
+        return {
+            success: false,
+            error: "Unable to activate season.",
+        };
+    }
+}

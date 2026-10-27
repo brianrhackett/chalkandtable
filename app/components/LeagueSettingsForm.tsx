@@ -7,6 +7,8 @@ import TeamsEditor from "@/app/components/TeamsEditor";
 import VenuesEditor from "@/app/components/VenuesEditor";
 import ScheduleEditor from "@/app/components/ScheduleEditor";
 import PlayoffsEditor from "@/app/components/PlayoffsEditor";
+import CreateSeasonForm from "@/app/components/CreateSeasonForm";
+import SeasonsEditor from "@/app/components/SeasonsEditor";
 
 import type { ThemeKey } from "@/src/lib/themes";
 
@@ -47,6 +49,11 @@ type LeagueSettingsFormProps = {
         playoffs: PlayoffConfiguration | null;
         playoffsEnabled: boolean | null;
 	};
+    seasons: {
+        id: number;
+        name: string;
+        active: boolean;
+    }[];
 };
 
 const initialState: LeagueSettingsState = {
@@ -57,6 +64,7 @@ const initialState: LeagueSettingsState = {
 export default function LeagueSettingsForm({
 	league,
     season,
+    seasons,
 }: LeagueSettingsFormProps) {
 	const updateSettings = updateLeagueSettings.bind(
 		null,
@@ -132,6 +140,35 @@ export default function LeagueSettingsForm({
                             </p>
                         </div>
                     </div>
+                </section>
+
+                {/* Past and Current Seasons */}
+                <section className="mt-8 rounded-lg border border-[var(--surface-alt)] bg-[var(--surface)] p-6">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 className="font-[family-name:var(--font-serif)] text-2xl">
+                                League Seasons
+                            </h2>
+
+                            <p className="mt-1 text-sm text-[var(--text-muted)]">
+                                Manage current and past seasons, or create a new one.
+                            </p>
+                        </div>
+                    </div>
+
+                    <SeasonsEditor
+                        leagueId={league.id}
+                        seasons={seasons}
+                    />
+
+                    <CreateSeasonForm
+                        leagueId={league.id}
+                        seasons={seasons.map((season) => ({
+                            id: season.id,
+                            name: season.name,
+                        }))}
+                        activeSeasonId={season.id}
+                    />
                 </section>
 
                 {/* League Teams & Schedule */}
@@ -329,6 +366,8 @@ export default function LeagueSettingsForm({
                     }
                 />
             )}
+
+            <div id="season-modal-root" />
         </>
     )
 }
