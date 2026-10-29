@@ -102,7 +102,7 @@ export default function ScoreModal({
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="score-modal-title"
-                        className="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl"
+                        className="w-full max-w-md rounded-xl border border-[var(--surface-alt)] bg-[var(--surface)] p-6 shadow-xl"
                         onClick={(event) => event.stopPropagation()}
                     >
                         <div className="mb-6 flex items-center justify-between">
@@ -151,7 +151,7 @@ export default function ScoreModal({
                             <button
                                 type="button"
                                 onClick={closeModal}
-                                className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium"
+                                className="btn-tertiary"
                             >
                                 Cancel
                             </button>
@@ -160,7 +160,7 @@ export default function ScoreModal({
                                 type="button"
                                 onClick={handleSave}
                                 disabled={isPending}
-                                className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                className="btn-primary"
                             >
                                 {isPending ? "Saving..." : "Save Score"}
                             </button>
@@ -194,7 +194,7 @@ function ScoreInput({
                 inputMode="numeric"
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
-                className="w-20 rounded-md border border-[var(--border)] bg-[var(--surface-alt)] px-3 py-2 text-center font-[family-name:var(--font-mono)] text-2xl font-semibold"
+                className="w-20 form-input font-[family-name:var(--font-mono)] text-2xl font-semibold"
             />
         </label>
     );

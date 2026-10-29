@@ -788,9 +788,12 @@ export async function saveSchedule(
 				week: week.week,
 				homeTeamId: match.homeTeamId,
 				awayTeamId: match.awayTeamId,
-				scheduledAt: Temporal.Instant.from(
-					`${match.scheduledAt}T00:00:00Z`
-				),
+				scheduledAt: Temporal.PlainDate.from(match.scheduledAt)
+					.toZonedDateTime({
+						timeZone: "America/New_York",
+						plainTime: Temporal.PlainTime.from("12:00"),
+					})
+					.toInstant(),
 			}))
 	);
 

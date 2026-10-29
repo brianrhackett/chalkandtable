@@ -125,7 +125,7 @@ export default function RosterManager({
 
             {showExistingPlayerModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
+                    <div className="w-full max-w-lg rounded-xl border border-[var(--surface-alt)] bg-[var(--surface)] p-6 shadow-xl">
                         <div className="mb-6 flex items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-xl font-semibold">
@@ -168,7 +168,7 @@ export default function RosterManager({
                                             : null
                                     )
                                 }
-                                className="w-full rounded-md border border-[var(--border)] bg-[var(--surface-alt)] px-3 py-2 outline-none focus:border-[var(--accent)]"
+                                className="w-full rounded-md border border-[var(--surface-alt)] bg-[var(--surface-alt)] px-3 py-2 outline-none focus:border-[var(--accent)]"
                             >
                                 <option value="">Select a player...</option>
 
@@ -189,14 +189,14 @@ export default function RosterManager({
                             </p>
                         )}
 
-                        <div className="mt-6 flex justify-end gap-3 border-t border-[var(--border)] pt-5">
+                        <div className="mt-6 flex justify-end gap-3 border-t border-[var(--surface-alt)] pt-5">
                             <button
                                 type="button"
                                 onClick={() => {
                                     setSelectedPlayerId(null);
                                     setShowExistingPlayerModal(false);
                                 }}
-                                className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium"
+                                className="btn-tertiary"
                             >
                                 Cancel
                             </button>
@@ -205,7 +205,7 @@ export default function RosterManager({
                                 type="button"
                                 onClick={handleAddExistingPlayer}
                                 disabled={isPending || !selectedPlayerId}
-                                className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                className="btn-primary"
                             >
                                 {isPending ? "Adding..." : "Add Player"}
                             </button>
@@ -216,7 +216,7 @@ export default function RosterManager({
 
             {showCreatePlayerModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
+                    <div className="w-full max-w-lg rounded-xl border border-[var(--surface-alt)] bg-[var(--surface)] p-6 shadow-xl">
                         <div className="mb-6 flex items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-xl font-semibold">

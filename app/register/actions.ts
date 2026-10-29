@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { db } from "../../src/prisma/db";
+import { signIn } from "@/auth";
 
 export type RegisterState = {
 	error: string | null;
@@ -63,9 +64,9 @@ export async function register(
         password: hashedPassword,
 	});
 
-    return {
-		error: null,
-        name: "",
-        email: "",
-	};
+    await signIn("credentials", {
+		email,
+		password,
+		redirectTo: "/dashboard",
+	});
 }
